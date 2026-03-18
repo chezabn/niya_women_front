@@ -53,20 +53,25 @@ export const RegisterSection = () => {
 
         setIsLoading(true);
         try {
-            await authService.register(formData);
+            const responseData = await authService.register(formData);
 
-            // ✅ SUCCÈS : Message visuel + Redirection douce
-            setSuccessMessage("Compte créé avec succès ! Redirection en cours...");
+            if (responseData.access_token) {
+                localStorage.setItem('access_token', responseData.access_token);
+                localStorage.setItem('refresh_token', responseData.refresh_token); // Utile pour rafraîchir plus tard
+                console.log("Token sauvegardé avec succès !");
+            } else {
+                // Cas où le backend ne renvoie pas le token directement après inscription
+                // Il faudra peut-être faire un appel login séparé juste après.
+                console.warn("Le backend n'a pas renvoyé de token. Une connexion manuelle sera nécessaire.");
+            }
 
-            // Petite pause pour laisser l'utilisateur lire le message (optionnel)
+            setSuccessMessage("Compte créé avec succès ! Redirection...");
+
             setTimeout(() => {
-                navigate('/profile');
+                navigate('/profile'); // On redirige vers le profil maintenant que le token est là
             }, 1500);
-
         } catch (err: any) {
             console.error("Erreur inscription:", err);
-
-            // Gestion des erreurs spécifiques de Django
             if (err.email) {
                 setErrors(prev => ({ ...prev, email: Array.isArray(err.email) ? err.email[0] : err.email }));
             } else if (err.username) {
