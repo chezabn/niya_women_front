@@ -1,10 +1,9 @@
-// src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
-import {Navbar} from "./composants/layout/Navbar.tsx";
+import { LoginPage } from './pages/LoginPage';
+import {Navbar} from "./components/layout/Navbar.tsx";
 
-// Composant simple pour la page d'accueil
 const HomePage = () => (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-gradient-to-br from-pink-50 via-white to-purple-50 px-4">
         <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-rose-500 mb-6 text-center drop-shadow-sm">
@@ -38,6 +37,7 @@ function App() {
                         <Route path="/" element={<HomePage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/login" element={<LoginPage />} />
                         {/* Tu ajouteras /login ici plus tard */}
                     </Routes>
                 </main>

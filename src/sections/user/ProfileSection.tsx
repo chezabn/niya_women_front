@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userService } from '../../services/user.service';
 import type {UpdateProfilePayload, UserProfile} from "../../types/user.ts";
-import {Input} from "../../composants/ui/Input.tsx";
-import {Button} from "../../composants/ui/Button.tsx";
+import {Input} from "../../components/ui/Input.tsx";
+import {Button} from "../../components/ui/Button.tsx";
 
 
 const MailIcon = () => (

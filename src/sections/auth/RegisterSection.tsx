@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import type {RegisterPayload} from "../../types/user.ts";
-import {Input} from "../../composants/ui/Input.tsx";
-import { Button } from "../../composants/ui/Button.tsx";
+import {Input} from "../../components/ui/Input.tsx";
+import { Button } from "../../components/ui/Button.tsx";
 
 export const RegisterSection = () => {
     const navigate = useNavigate();

@@ -15,6 +15,19 @@ export interface UpdateProfilePayload {
 
 export type UpdateProfileResponse = UserProfile;
 
+// Login Part
+export interface LoginPayload {
+    username: string;
+    password: string;
+}
+
+export interface LoginResponse {
+    refresh: string;
+    access: string;
+}
+
+
+// Register Part
 export interface RegisterPayload {
     username: string;
     email: string;
