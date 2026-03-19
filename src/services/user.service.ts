@@ -1,6 +1,7 @@
 // src/services/user.service.ts
 import apiClient from '../lib/axios';
 import type {UpdateProfilePayload, UpdateProfileResponse, UserProfile} from "../types/user.ts";
+import {getCurrentUserId} from "../lib/auth.utils.ts";
 
 export const userService = {
     /**
@@ -8,7 +9,14 @@ export const userService = {
      */
     getAllUsers: async (): Promise<UserProfile[]> => {
         const response = await apiClient.get<UserProfile[]>('/users/users/');
-        return response.data;
+        const allUsers = response.data;
+
+        const myId = getCurrentUserId();
+
+        if (myId !== null) {
+            return allUsers.filter(user => user.id !== myId);
+        }
+        return allUsers;
     },
 
     /**

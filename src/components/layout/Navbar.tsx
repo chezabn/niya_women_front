@@ -33,14 +33,20 @@ export const Navbar = () => {
                     <Link to="/" className="flex items-center gap-2 group">
                         <span className="text-2xl">🌸</span>
                         <span className="font-bold text-xl text-gray-800 group-hover:text-pink-600 transition-colors">
-              Niyya
-            </span>
+                          Niyya Women
+                        </span>
                     </Link>
 
                     {/* Liens de navigation */}
                     <div className="flex items-center gap-4">
                         {isAuthenticated ? (
                             <>
+                                <Link
+                                    to="/all-users"
+                                    className="text-gray-600 hover:text-pink-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-pink-50"
+                                >
+                                    Amies
+                                </Link>
                                 <Link
                                     to="/profile"
                                     className="text-gray-600 hover:text-pink-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-pink-50"
