@@ -23,7 +23,7 @@ export const userService = {
      * GET one user by ID
      */
     getUserById: async (id: number): Promise<UserProfile> => {
-        const response = await apiClient.get<UserProfile>(`/users/${id}`);
+        const response = await apiClient.get<UserProfile>(`/users/users/${id}`);
         return response.data;
     },
 
