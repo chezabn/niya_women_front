@@ -4,16 +4,23 @@ import type {UpdateProfilePayload, UpdateProfileResponse, UserProfile} from "../
 
 export const userService = {
     /**
-     * Récupère le profil de l'utilisateur connecté
+     * GET all users
      */
-    getProfile: async (): Promise<UserProfile> => {
-        const response = await apiClient.get<UserProfile>('/users/user/'); // Adapte l'URL si besoin
+    getAllUsers: async (): Promise<UserProfile[]> => {
+        const response = await apiClient.get<UserProfile[]>('/users/users/');
         return response.data;
     },
 
     /**
-     * Met à jour le profil (PATCH)
-     * Envoie uniquement les champs modifiés
+     * GET my profile
+     */
+    getProfile: async (): Promise<UserProfile> => {
+        const response = await apiClient.get<UserProfile>('/users/user/');
+        return response.data;
+    },
+
+    /**
+     * PATCH my profile
      */
     updateProfile: async (data: UpdateProfilePayload): Promise<UpdateProfileResponse> => {
         const response = await apiClient.patch<UpdateProfileResponse>('/users/user/', data);
@@ -21,7 +28,7 @@ export const userService = {
     },
 
     /**
-     * Supprime le compte utilisateur
+     * DELETE my profile
      */
     deleteProfile: async (): Promise<void> => {
         await apiClient.delete('/users/user/');
