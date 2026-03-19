@@ -66,4 +66,4 @@ npm-build:
 ## deploy: Deploy project to production environment
 .PHONY: deploy
 deploy:npm-build mv-htaccess
-	rsync -rz --delete --mkpath dist/ nabia@ssh-nabia.alwaysdata.net:www/niyya/
+	rsync -rz --delete --mkpath dist/ niwo@ssh-niwo.alwaysdata.net:www/niyya/
