@@ -46,14 +46,12 @@ export const ProfileSection = ({ userId }: ProfileSectionProps) => {
             }
 
             try {
-                let data: UserProfile;
+                let data: UserProfile | null;
 
                 if (isOwner) {
                     // Si c'est moi, j'utilise l'endpoint sécurisé de mon profil
                     data = await userService.getProfile();
                 } else {
-                    // Si c'est quelqu'un d'autre, j'utilise l'endpoint par ID
-                    // Note: Tu devras créer cette fonction dans ton service si elle n'existe pas
                     data = await userService.getUserById(targetUserId);
                 }
 

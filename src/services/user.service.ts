@@ -20,6 +20,14 @@ export const userService = {
     },
 
     /**
+     * GET one user by ID
+     */
+    getUserById: async (id: number): Promise<UserProfile> => {
+        const response = await apiClient.get<UserProfile>(`/users/${id}`);
+        return response.data;
+    },
+
+    /**
      * GET my profile
      */
     getProfile: async (): Promise<UserProfile> => {
