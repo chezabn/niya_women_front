@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// L'URL de ton API Django (à mettre dans .env plus tard)
+// TODO Mettre dans le .env
 const API_BASE_URL = 'https://nabia.alwaysdata.net/api';
 
 export const apiClient = axios.create({
