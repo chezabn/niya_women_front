@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// TODO Mettre dans le .env
-const API_BASE_URL = 'https://nabia.alwaysdata.net/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,
