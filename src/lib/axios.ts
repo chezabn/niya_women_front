@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = 'https://niwo.alwaysdata.net/api';
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,
