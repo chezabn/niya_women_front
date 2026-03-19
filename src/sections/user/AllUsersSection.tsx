@@ -13,9 +13,6 @@ export const AllUsersSection = () => {
         const fetchUsers = async () => {
             try {
                 const data = await userService.getAllUsers();
-                // Optionnel : Filtrer pour ne pas s'afficher soi-même si l'ID est présent dans la réponse
-                // const currentUserId = ...;
-                // setUsers(data.filter(u => u.id !== currentUserId));
                 setUsers(data);
             } catch (err) {
                 setError("Impossible de charger la liste des membres.");

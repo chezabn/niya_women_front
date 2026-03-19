@@ -5,12 +5,14 @@ export interface UserProfile {
     email: string;
     first_name: string;
     last_name: string;
+    bio: string;
 }
 
 export interface UpdateProfilePayload {
     email?: string;
     first_name?: string;
     last_name?: string;
+    bio?: string;
 }
 
 export type UpdateProfileResponse = UserProfile;
