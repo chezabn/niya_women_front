@@ -1,6 +1,12 @@
 // src/services/user.service.ts
 import apiClient from '../lib/axios';
-import type {UpdateProfilePayload, UpdateProfileResponse, UserProfile} from "../types/user.ts";
+import type {
+    MessageResponse,
+    UpdateProfilePayload,
+    UpdateProfileResponse,
+    UserProfile,
+    VerifyEmailPayload
+} from "../types/user.ts";
 import {getCurrentUserId} from "../lib/auth.utils.ts";
 
 export const userService = {
@@ -33,6 +39,16 @@ export const userService = {
     getProfile: async (): Promise<UserProfile> => {
         const response = await apiClient.get<UserProfile>('/users/user/');
         return response.data;
+    },
+
+    postSendVerificationEmail: async (): Promise<MessageResponse> => {
+        const response = await apiClient.post<MessageResponse>('/users/send-verification-code/');
+        return response.data
+    },
+
+    postVerifyEmail: async (data: VerifyEmailPayload): Promise<MessageResponse> => {
+        const response = await apiClient.post<MessageResponse>('/users/verify-email/', data);
+        return response.data
     },
 
     /**

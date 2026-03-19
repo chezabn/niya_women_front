@@ -44,3 +44,12 @@ export interface RegisterResponse {
     access_token: string;
     refresh_token: string;
 }
+
+// Verification mail
+export interface MessageResponse {
+    message: string;
+}
+
+export interface VerifyEmailPayload {
+    code: number;
+}
