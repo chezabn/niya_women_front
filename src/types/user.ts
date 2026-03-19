@@ -6,6 +6,7 @@ export interface UserProfile {
     first_name: string;
     last_name: string;
     bio: string;
+    email_verified: boolean;
 }
 
 export interface UpdateProfilePayload {
@@ -51,5 +52,5 @@ export interface MessageResponse {
 }
 
 export interface VerifyEmailPayload {
-    code: number;
+    code: string;
 }

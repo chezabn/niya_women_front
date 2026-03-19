@@ -1,6 +1,6 @@
 // src/pages/UserDetailPage.tsx
 import { useParams, Navigate, Link } from 'react-router-dom';
-import { ProfileSection } from '../sections/user/ProfileSection';
+import ProfileSection from '../sections/user/ProfileSection';
 
 export const UserDetailPage = () => {
     const { id } = useParams<{ id: string }>();

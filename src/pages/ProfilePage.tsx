@@ -1,6 +1,6 @@
 // src/pages/ProfilePage.tsx
 import { Navigate } from 'react-router-dom';
-import { ProfileSection } from '../sections/user/ProfileSection';
+import ProfileSection from '../sections/user/ProfileSection';
 
 export const ProfilePage = () => {
     const token = localStorage.getItem('access_token');
