@@ -29,7 +29,6 @@ function App() {
     return (
         <BrowserRouter>
             <div className="min-h-screen bg-gray-50 font-sans">
-                {/* La Navbar s'affiche ici */}
                 <Navbar />
 
                 <main>
@@ -38,7 +37,6 @@ function App() {
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/login" element={<LoginPage />} />
-                        {/* Tu ajouteras /login ici plus tard */}
                     </Routes>
                 </main>
             </div>
