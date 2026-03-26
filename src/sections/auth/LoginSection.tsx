@@ -1,12 +1,16 @@
 // src/sections/auth/LoginSection.tsx
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { authService } from '../../services/auth.service';
+import {useState} from 'react';
+import {useNavigate, Link} from 'react-router-dom';
+import {Input} from '../../components/ui/Input';
+import {Button} from '../../components/ui/Button';
+import {authService} from '../../services/auth.service';
 import type {LoginPayload} from "../../types/user.ts";
 
-export const LoginSection = () => {
+interface LoginSectionProps {
+    onForgotPassword?: () => void
+}
+
+export const LoginSection = ({onForgotPassword}: LoginSectionProps) => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<LoginPayload>({
@@ -19,12 +23,12 @@ export const LoginSection = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setFormData(prev => ({...prev, [name]: value}));
 
         // Nettoyer les erreurs quand l'utilisateur tape
         if (errors[name as keyof LoginPayload]) {
-            setErrors(prev => ({ ...prev, [name]: undefined }));
+            setErrors(prev => ({...prev, [name]: undefined}));
         }
         if (globalError) setGlobalError(null);
     };
@@ -69,9 +73,9 @@ export const LoginSection = () => {
                 // Erreur globale venant souvent de Django DRF/SimpleJWT
                 setGlobalError(err.detail);
             } else if (err.username) {
-                setErrors(prev => ({ ...prev, username: Array.isArray(err.username) ? err.username[0] : err.username }));
+                setErrors(prev => ({...prev, username: Array.isArray(err.username) ? err.username[0] : err.username}));
             } else if (err.password) {
-                setErrors(prev => ({ ...prev, password: Array.isArray(err.password) ? err.password[0] : err.password }));
+                setErrors(prev => ({...prev, password: Array.isArray(err.password) ? err.password[0] : err.password}));
             } else {
                 setGlobalError(err.message || "Échec de la connexion. Vérifiez vos identifiants.");
             }
@@ -129,9 +133,14 @@ export const LoginSection = () => {
                         Créer un compte
                     </Link>
                 </p>
-                <p className="text-xs text-gray-400 mt-4">
-                    <a href="#" className="hover:text-gray-600">Mot de passe oublié ?</a>
-                </p>
+                <div className="mt-4 text-center">
+                    <button
+                        onClick={onForgotPassword}
+                        className="text-xs text-pink-600 hover:underline font-medium"
+                    >
+                        Mot de passe oublié ?
+                    </button>
+                </div>
             </div>
         </div>
     );

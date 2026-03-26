@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import {Navbar} from "./components/layout/Navbar.tsx";
 import {AllUsersPage} from "./pages/AllUsersPage.tsx";
 import {UserDetailPage} from "./pages/UserDetailPage.tsx";
+import {ResetPasswordPage} from "./pages/ResetPasswordPage.tsx";
 
 const HomePage = () => (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-gradient-to-br from-pink-50 via-white to-purple-50 px-4">
@@ -38,8 +39,10 @@ function App() {
                         <Route path="/" element={<HomePage />} />
                         {/* Route pour tout ce qui concerne le service USER */}
                         <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/login" element={<LoginPage />} />
+                        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                        <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/all-users" element={<AllUsersPage />} />
                         <Route path="/users/:id" element={<UserDetailPage />} />
 

@@ -54,3 +54,20 @@ export interface MessageResponse {
 export interface VerifyEmailPayload {
     code: string;
 }
+
+// Password Reset
+export interface PasswordResetRequestPayload {
+    email: string;
+}
+
+
+export interface PasswordResetResponse {
+    message: string;
+}
+
+
+export interface PasswordResetConfirmPayload {
+    email: string;
+    code: string;
+    new_password: string;
+}

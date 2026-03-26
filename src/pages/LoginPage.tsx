@@ -1,7 +1,18 @@
 // src/pages/LoginPage.tsx
-import { LoginSection } from '../sections/auth/LoginSection';
+import {LoginSection} from '../sections/auth/LoginSection';
+import {ForgotPasswordModal} from "../components/auth/ForgotPasswordModal.tsx";
+import {useState} from "react";
+import {useNavigate} from "react-router-dom";
 
 export const LoginPage = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleModalSuccess = (email: string) => {
+        setIsModalOpen(false);
+        navigate('/reset-password', { state: { email } });
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center p-4">
             <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -23,9 +34,14 @@ export const LoginPage = () => {
 
                 {/* Partie Droite : Formulaire */}
                 <div className="flex justify-center">
-                    <LoginSection />
+                    <LoginSection onForgotPassword={() => setIsModalOpen(true)} />
                 </div>
 
+                <ForgotPasswordModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSuccess={handleModalSuccess}
+                />
             </div>
         </div>
     );
