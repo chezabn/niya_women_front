@@ -1,6 +1,7 @@
 // src/services/company.service.ts
 import apiClient from '../lib/axios';
 import type { Company, CreateCompanyPayload, UpdateCompanyPayload } from '../types/company';
+import {getCurrentUserId} from "../lib/auth.utils.ts";
 
 export const companyService = {
     /**
@@ -9,7 +10,12 @@ export const companyService = {
     getAllCompanies: async (searchQuery?: string): Promise<Company[]> => {
         const params = searchQuery ? { params: { search: searchQuery } } : {};
         const response = await apiClient.get<Company[]>('/company/company/', params);
-        return response.data;
+        const allCompanies = response.data
+        const myId = getCurrentUserId();
+        if (myId !== null) {
+            return allCompanies.filter(company => company.owner_id !== myId);
+        }
+        return allCompanies;
     },
 
     /**

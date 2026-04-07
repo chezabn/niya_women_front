@@ -16,9 +16,7 @@ export const userService = {
     getAllUsers: async (): Promise<UserProfile[]> => {
         const response = await apiClient.get<UserProfile[]>('/users/users/');
         const allUsers = response.data;
-
         const myId = getCurrentUserId();
-
         if (myId !== null) {
             return allUsers.filter(user => user.id !== myId);
         }

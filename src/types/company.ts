@@ -9,7 +9,7 @@ export interface Company {
     email: string | null;
     website: string | null;
     logo: string | null; // URL de l'image
-    // Le champ 'user' n'est généralement pas renvoyé ou nécessaire pour l'affichage public
+    owner_id: number;
 }
 
 export interface CreateCompanyPayload {
