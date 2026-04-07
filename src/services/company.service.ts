@@ -47,7 +47,7 @@ export const companyService = {
      */
     deleteCompany: async (): Promise<void> => {
         // Le backend demande un body { confirm: true }
-        await apiClient.delete('/company/mine', { data: { confirm: true } });
+        await apiClient.delete('/company/company/mine/', { data: { confirm: true } });
     },
 
     /**
