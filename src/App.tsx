@@ -8,6 +8,7 @@ import {UserDetailPage} from "./pages/UserDetailPage.tsx";
 import {ResetPasswordPage} from "./pages/ResetPasswordPage.tsx";
 import {CompaniesPage} from "./pages/CompaniesPage.tsx";
 import {CreateCompanyPage} from "./pages/CreateCompanyPage.tsx";
+import {CompanyDetailPage} from "./pages/CompanyDetailPage.tsx";
 
 const HomePage = () => (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-gradient-to-br from-pink-50 via-white to-purple-50 px-4">
@@ -50,7 +51,7 @@ function App() {
 
                         <Route path="/companies" element={<CompaniesPage />} />
                         <Route path="/companies/create" element={<CreateCompanyPage />} />
-
+                        <Route path="/companies/:id" element={<CompanyDetailPage />} />
 
                     </Routes>
                 </main>

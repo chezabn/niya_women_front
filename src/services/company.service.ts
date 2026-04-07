@@ -9,7 +9,7 @@ export const companyService = {
      */
     getAllCompanies: async (searchQuery?: string): Promise<Company[]> => {
         const params = searchQuery ? { params: { search: searchQuery } } : {};
-        const response = await apiClient.get<Company[]>('/company/company/', params);
+        const response = await apiClient.get<Company[]>('/company/companies/', params);
         const allCompanies = response.data
         const myId = getCurrentUserId();
         if (myId !== null) {
@@ -19,10 +19,18 @@ export const companyService = {
     },
 
     /**
+     * Récupère mon entreprise
+     */
+    getMyCompany: async (): Promise<Company> => {
+        const response = await apiClient.get<Company>('/company/company/mine/');
+        return response.data;
+    },
+
+    /**
      * Crée une nouvelle entreprise
      */
     createCompany: async (data: CreateCompanyPayload): Promise<Company> => {
-        const response = await apiClient.post<Company>('/company/company/', data);
+        const response = await apiClient.post<Company>('/company/company/mine/', data);
         return response.data;
     },
 
@@ -30,7 +38,7 @@ export const companyService = {
      * Met à jour l'entreprise de l'utilisateur connecté
      */
     updateCompany: async (data: UpdateCompanyPayload): Promise<Company> => {
-        const response = await apiClient.patch<Company>('/company/company/', data);
+        const response = await apiClient.patch<Company>('/company/company/mine/', data);
         return response.data;
     },
 
@@ -39,14 +47,14 @@ export const companyService = {
      */
     deleteCompany: async (): Promise<void> => {
         // Le backend demande un body { confirm: true }
-        await apiClient.delete('/company/', { data: { confirm: true } });
+        await apiClient.delete('/company/mine', { data: { confirm: true } });
     },
 
     /**
      * Récupère une entreprise par son ID
      */
     getCompanyById: async (id: number): Promise<Company> => {
-        const response = await apiClient.get<Company>(`/company/company/${id}/`);
+        const response = await apiClient.get<Company>(`/company/companies/${id}/`);
         return response.data;
     },
 };
