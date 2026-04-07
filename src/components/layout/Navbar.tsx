@@ -48,6 +48,12 @@ export const Navbar = () => {
                                     Amies
                                 </Link>
                                 <Link
+                                    to="/companies"
+                                    className="text-gray-600 hover:text-pink-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-pink-50"
+                                >
+                                    Entreprises
+                                </Link>
+                                <Link
                                     to="/profile"
                                     className="text-gray-600 hover:text-pink-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-pink-50"
                                 >
