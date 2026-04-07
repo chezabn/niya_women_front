@@ -8,7 +8,7 @@ export const companyService = {
      */
     getAllCompanies: async (searchQuery?: string): Promise<Company[]> => {
         const params = searchQuery ? { params: { search: searchQuery } } : {};
-        const response = await apiClient.get<Company[]>('/company/', params);
+        const response = await apiClient.get<Company[]>('/company/company/', params);
         return response.data;
     },
 
@@ -16,7 +16,7 @@ export const companyService = {
      * Crée une nouvelle entreprise
      */
     createCompany: async (data: CreateCompanyPayload): Promise<Company> => {
-        const response = await apiClient.post<Company>('/company/', data);
+        const response = await apiClient.post<Company>('/company/company/', data);
         return response.data;
     },
 
@@ -24,7 +24,7 @@ export const companyService = {
      * Met à jour l'entreprise de l'utilisateur connecté
      */
     updateCompany: async (data: UpdateCompanyPayload): Promise<Company> => {
-        const response = await apiClient.patch<Company>('/company/', data);
+        const response = await apiClient.patch<Company>('/company/company/', data);
         return response.data;
     },
 
@@ -40,7 +40,7 @@ export const companyService = {
      * Récupère une entreprise par son ID
      */
     getCompanyById: async (id: number): Promise<Company> => {
-        const response = await apiClient.get<Company>(`/company/${id}/`);
+        const response = await apiClient.get<Company>(`/company/company/${id}/`);
         return response.data;
     },
 };
