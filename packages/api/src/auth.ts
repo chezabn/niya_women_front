@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import {RegisterRequest, RegisterResponse} from "../../types";
+import {LoginRequest, LoginResponse, RegisterRequest, RegisterResponse} from "../../types";
 
 
 
@@ -14,3 +14,15 @@ export const register = (
         },
     );
 };
+
+export const login = (
+    payload: LoginRequest,
+) => {
+    return apiFetch<LoginResponse>(
+        "/auth/login/",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }
+    )
+}

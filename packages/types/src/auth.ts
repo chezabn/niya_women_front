@@ -13,3 +13,14 @@ export interface RegisterResponse {
     "access": string;
     "refresh": string;
 }
+
+export interface LoginRequest {
+    username: string;
+    password: string;
+}
+
+export interface LoginResponse {
+    "message": string;
+    "access": string;
+    "refresh": string;
+}

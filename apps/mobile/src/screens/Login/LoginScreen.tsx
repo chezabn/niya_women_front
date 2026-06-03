@@ -10,13 +10,25 @@ import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
+import { login } from "@niyya/api";
+
 
 export const LoginScreen = () => {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = () => {
-        console.log(email, password);
+    const handleLogin = async () => {
+        try {
+            const response = await login({
+                username,
+                password,
+            });
+
+            console.log(response); // TODO Ajouter la logique pour stocker les tokens et pour pouvoir utiliser ce token dans les autres pages
+
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
@@ -31,10 +43,9 @@ export const LoginScreen = () => {
                 </Text>
 
                 <Input
-                    placeholder="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
+                    placeholder="Nom d'utilisateur"
+                    value={username}
+                    onChangeText={setUsername}
                 />
 
                 <Input
