@@ -1,4 +1,4 @@
-import {API_BASE_URL} from "../../constants/src";
+import {API_BASE_URL} from "../../constants";
 
 
 export async function apiFetch<T>(

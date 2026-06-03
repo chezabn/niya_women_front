@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import {RegisterRequest, RegisterResponse} from "../../types/src";
+import {RegisterRequest, RegisterResponse} from "../../types";
 
 
 
