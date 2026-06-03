@@ -38,7 +38,7 @@ export const RegisterScreen = () => {
                 accept_cgu: acceptCgu,
             });
 
-            console.log(response);
+            console.log(response); // TODO Ajouter la logique pour stocker les tokens et pour pouvoir utiliser ce token dans les autres pages
 
         } catch (error) {
             console.error(error);
