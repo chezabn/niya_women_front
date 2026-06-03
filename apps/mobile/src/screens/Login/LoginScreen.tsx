@@ -60,6 +60,10 @@ export const LoginScreen = () => {
                     onPress={handleLogin}
                 />
 
+                <Link href="/forgot-password" style={styles.link}>
+                    Mot de passe oublié ?
+                </Link>
+
                 <Text style={styles.secondary}>
                     OU
                 </Text>
