@@ -10,6 +10,7 @@ import { Link } from "expo-router";
 import {Input} from "@/src/components/ui/Input";
 import {Button} from "@/src/components/ui/Button";
 import {colors} from "@/src/theme";
+import { register } from "@niyya/api";
 
 
 
@@ -25,16 +26,23 @@ export const RegisterScreen = () => {
 
     const [acceptCgu, setAcceptCgu] = useState(false);
 
-    const handleRegister = () => {
-        console.log({
-            username,
-            email,
-            first_name: firstName,
-            last_name: lastName,
-            password,
-            password2,
-            accept_cgu: acceptCgu,
-        });
+    const handleRegister = async () => {
+        try {
+            const response = await register({
+                username,
+                email,
+                first_name: firstName,
+                last_name: lastName,
+                password,
+                password2,
+                accept_cgu: acceptCgu,
+            });
+
+            console.log(response);
+
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
