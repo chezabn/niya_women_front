@@ -1,3 +1,5 @@
+import {stringify} from "node:querystring";
+
 export interface RegisterRequest {
     username: string;
     email: string;
@@ -31,4 +33,13 @@ export interface ForgotPasswordRequest {
 
 export interface ForgotPasswordResponse {
     "detail": string;
+}
+export interface ResetPasswordRequest {
+    email: string;
+    code: string;
+    new_password: string;
+}
+
+export interface ResetPasswordResponse {
+    detail: string;
 }

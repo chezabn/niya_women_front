@@ -6,6 +6,8 @@ import { Link } from "expo-router";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { colors } from "@/src/theme";
+import { resetPassword } from "@niyya/api";
+
 
 export const ResetPasswordScreen = () => {
     const [email, setEmail] = useState("");
@@ -13,13 +15,16 @@ export const ResetPasswordScreen = () => {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
-    const handleResetPassword = () => {
-        console.log({
-            email,
-            code,
-            new_password: newPassword,
-            confirm_password: confirmPassword,
-        });
+    const handleResetPassword = async () => {
+        try {
+            const response = await resetPassword({
+                email: email,
+                code: code,
+                new_password: newPassword,
+            })
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
