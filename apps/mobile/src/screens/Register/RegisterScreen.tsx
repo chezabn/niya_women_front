@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
     footer: {
         textAlign: "center",
         marginTop: 16,
+        color: colors.textSecondary,
     },
 
     link: {

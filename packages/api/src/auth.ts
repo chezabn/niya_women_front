@@ -1,5 +1,12 @@
 import { apiFetch } from "./client";
-import {LoginRequest, LoginResponse, RegisterRequest, RegisterResponse} from "../../types";
+import {
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+    RegisterResponse
+} from "../../types";
 
 
 
@@ -20,6 +27,18 @@ export const login = (
 ) => {
     return apiFetch<LoginResponse>(
         "/auth/login/",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }
+    )
+}
+
+export const forgotPassword = (
+    payload: ForgotPasswordRequest,
+) => {
+    return apiFetch<ForgotPasswordResponse>(
+        "/auth/request-password-reset/",
         {
             method: "POST",
             body: JSON.stringify(payload),

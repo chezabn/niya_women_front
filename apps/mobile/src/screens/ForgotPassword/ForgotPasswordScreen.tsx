@@ -1,17 +1,27 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import {Link, router} from "expo-router";
 
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { colors } from "@/src/theme";
+import { forgotPassword } from "@niyya/api";
+
 
 export const ForgotPasswordScreen = () => {
     const [email, setEmail] = useState("");
 
-    const handleRequestReset = () => {
-        console.log(email);
+    const handleRequestReset = async () => {
+        try {
+            const response = await forgotPassword({
+                email: email,
+            });
+
+            router.push("/reset-password");
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (

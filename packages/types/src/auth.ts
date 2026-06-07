@@ -24,3 +24,11 @@ export interface LoginResponse {
     "access": string;
     "refresh": string;
 }
+
+export interface ForgotPasswordRequest {
+    "email": string;
+}
+
+export interface ForgotPasswordResponse {
+    "detail": string;
+}
