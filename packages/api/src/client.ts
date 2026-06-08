@@ -4,6 +4,7 @@ import {API_BASE_URL} from "../../constants";
 export async function apiFetch<T>(
     endpoint: string,
     options?: RequestInit,
+    accessToken?: string,
 ): Promise<T> {
 
     const response = await fetch(
@@ -11,9 +12,12 @@ export async function apiFetch<T>(
         {
             headers: {
                 "Content-Type": "application/json",
+                ...(accessToken && {
+                    Authorization: `Bearer ${accessToken}`,
+                }),
             },
             ...options,
-        },
+        }
     );
 
     const data = await response.json();

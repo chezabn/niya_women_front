@@ -6,11 +6,12 @@ import {
     StyleSheet,
     Switch, ScrollView,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import {Input} from "@/src/components/ui/Input";
 import {Button} from "@/src/components/ui/Button";
 import {colors} from "@/src/theme";
 import { register } from "@niyya/api";
+import {useAuthStore} from "@/src/store/authStore";
 
 
 
@@ -26,6 +27,10 @@ export const RegisterScreen = () => {
 
     const [acceptCgu, setAcceptCgu] = useState(false);
 
+    const setTokens = useAuthStore(
+        (state) => state.setTokens,
+    );
+
     const handleRegister = async () => {
         try {
             const response = await register({
@@ -38,7 +43,12 @@ export const RegisterScreen = () => {
                 accept_cgu: acceptCgu,
             });
 
-            console.log(response); // TODO Ajouter la logique pour stocker les tokens et pour pouvoir utiliser ce token dans les autres pages
+            setTokens(
+                response.access,
+                response.refresh,
+            );
+
+            router.replace("/verify-email");
 
         } catch (error) {
             console.error(error);

@@ -62,25 +62,27 @@ export const resetPassword = (
 }
 
 export const sendVerificationEmail = (
-    payload: SendVerificationCodeRequest,
+    accessToken: string,
 ) => {
     return apiFetch<SendVerificationCodeResponse>(
         "/auth/send-verification-code/",
         {
             method: "POST",
-            body: JSON.stringify(payload),
-        }
+        },
+        accessToken,
     )
 }
 
 export const verifyEmail = (
     payload: VerifyEmailRequest,
+    accessToken: string,
 ) => {
     return apiFetch<VerifyEmailResponse>(
         "/auth/verify-email/",
         {
             method: "POST",
             body: JSON.stringify(payload),
-        }
+        },
+        accessToken,
     )
 }
