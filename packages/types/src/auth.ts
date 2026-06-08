@@ -1,5 +1,3 @@
-import {stringify} from "node:querystring";
-
 export interface RegisterRequest {
     username: string;
     email: string;
@@ -41,5 +39,21 @@ export interface ResetPasswordRequest {
 }
 
 export interface ResetPasswordResponse {
+    detail: string;
+}
+
+export interface SendVerificationCodeRequest {
+    detail: string;
+}
+
+export interface SendVerificationCodeResponse {
+    detail: string;
+}
+
+export interface VerifyEmailRequest {
+    code: string;
+}
+
+export interface VerifyEmailResponse {
     detail: string;
 }

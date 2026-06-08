@@ -7,7 +7,8 @@ import {
     RegisterRequest,
     RegisterResponse,
     ResetPasswordRequest,
-    ResetPasswordResponse,
+    ResetPasswordResponse, SendVerificationCodeRequest, SendVerificationCodeResponse,
+    VerifyEmailRequest, VerifyEmailResponse,
 } from "../../types";
 
 
@@ -53,6 +54,30 @@ export const resetPassword = (
 ) => {
     return apiFetch<ResetPasswordResponse>(
         "/auth/confirm-password-reset/",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }
+    )
+}
+
+export const sendVerificationEmail = (
+    payload: SendVerificationCodeRequest,
+) => {
+    return apiFetch<SendVerificationCodeResponse>(
+        "/auth/send-verification-code/",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }
+    )
+}
+
+export const verifyEmail = (
+    payload: VerifyEmailRequest,
+) => {
+    return apiFetch<VerifyEmailResponse>(
+        "/auth/verify-email/",
         {
             method: "POST",
             body: JSON.stringify(payload),
