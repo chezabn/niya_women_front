@@ -100,6 +100,9 @@ export const LoginScreen = () => {
                         Inscrivez-vous maintenant
                     </Link>
                 </Text>
+                <Link href="/admin-review" style={styles.link}>
+                    Inscrivez-vous maintenant
+                </Link>
             </View>
         </SafeAreaView>
     );
