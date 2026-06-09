@@ -10,21 +10,38 @@ import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
-import { login } from "@niyya/api";
+import { login, getMe } from "@niyya/api";
+import {useAuthStore} from "@/src/store/authStore";
 
 
 export const LoginScreen = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const {
+        setTokens,
+        setUser,
+    } = useAuthStore();
+
     const handleLogin = async () => {
         try {
-            const response = await login({
+            const tokens = await login({
                 username,
                 password,
             });
 
-            console.log(response); // TODO Ajouter la logique pour stocker les tokens et pour pouvoir utiliser ce token dans les autres pages
+            setTokens(
+                tokens.access,
+                tokens.refresh,
+            );
+
+            const user = await getMe(
+                tokens.access,
+            );
+
+            setUser(user);
+
+            console.log(user);
 
         } catch (error) {
             console.error(error);
