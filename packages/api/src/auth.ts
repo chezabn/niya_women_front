@@ -86,3 +86,9 @@ export const verifyEmail = (
         accessToken,
     )
 }
+
+export const verifyIdentity = (
+    accessToken: string,
+) => {
+    
+}

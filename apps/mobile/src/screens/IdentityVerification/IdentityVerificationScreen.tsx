@@ -1,32 +1,35 @@
-import React, { useState } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    Image,
-    Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
-
-import { Button } from "@/src/components/ui/Button";
-import { colors } from "@/src/theme";
+import React, {useState} from "react";
+import {Alert, Image, StyleSheet, Text, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import { submitIdentityVerification } from "@niyya/api";
+import { useAuthStore } from "@/src/store/authStore";
+import {Button} from "@/src/components/ui/Button";
+import {colors} from "@/src/theme";
+import {useImagePicker} from "@/src/hooks/useImagePicker";
 
 export const IdentityVerificationScreen = () => {
     const [idCard, setIdCard] = useState<string | null>(null);
     const [selfie, setSelfie] = useState<string | null>(null);
 
-    const pickImage = async (
-        setter: React.Dispatch<React.SetStateAction<string | null>>,
-    ) => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ["images"],
-            quality: 0.8,
-            allowsEditing: true,
-        });
+    const accessToken = useAuthStore(
+        (state) => state.accessToken,
+    );
 
-        if (!result.canceled) {
-            setter(result.assets[0].uri);
+    const { takePhoto } = useImagePicker();
+
+    const takeIdCard = async () => {
+        const photo = await takePhoto();
+
+        if (photo) {
+            setIdCard(photo.uri);
+        }
+    };
+
+    const takeSelfie = async () => {
+        const photo = await takePhoto();
+
+        if (photo) {
+            setSelfie(photo.uri);
         }
     };
 
@@ -39,13 +42,25 @@ export const IdentityVerificationScreen = () => {
             return;
         }
 
-        console.log({
-            idCard,
-            selfie,
-        });
+        try {
+            const response =
+                await submitIdentityVerification(
+                    idCard,
+                    selfie,
+                    accessToken!,
+                );
 
-        // TODO:
-        // submitIdentityVerification(...)
+            Alert.alert(
+                "Demande envoyée",
+                response.message,
+            );
+
+        } catch (error: any) {
+            Alert.alert(
+                "Erreur",
+                error.detail || "Impossible d'envoyer les documents.",
+            );
+        }
     };
 
     return (
@@ -61,8 +76,8 @@ export const IdentityVerificationScreen = () => {
                 </Text>
 
                 <Button
-                    text="Choisir ma pièce d'identité"
-                    onPress={() => pickImage(setIdCard)}
+                    text="Prendre une photo de ma pièce d'identité"
+                    onPress={takeIdCard}
                 />
 
                 {idCard && (
@@ -73,8 +88,8 @@ export const IdentityVerificationScreen = () => {
                 )}
 
                 <Button
-                    text="Choisir mon selfie"
-                    onPress={() => pickImage(setSelfie)}
+                    text="Prendre un selfie"
+                    onPress={takeSelfie}
                 />
 
                 {selfie && (

@@ -7,16 +7,21 @@ export async function apiFetch<T>(
     accessToken?: string,
 ): Promise<T> {
 
+    const headers: Record<string, string> = {};
+
+    if (!(options?.body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     const response = await fetch(
         `${API_BASE_URL}${endpoint}`,
         {
-            headers: {
-                "Content-Type": "application/json",
-                ...(accessToken && {
-                    Authorization: `Bearer ${accessToken}`,
-                }),
-            },
             ...options,
+            headers,
         }
     );
 
