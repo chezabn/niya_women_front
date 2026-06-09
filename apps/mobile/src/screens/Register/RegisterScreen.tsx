@@ -48,7 +48,7 @@ export const RegisterScreen = () => {
                 response.refresh,
             );
 
-            router.replace("/identity-verification");
+            router.replace("/verify-email");
 
         } catch (error) {
             console.error(error);
