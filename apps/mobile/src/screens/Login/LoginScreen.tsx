@@ -12,7 +12,7 @@ import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
 import { login, getMe } from "@niyya/api";
 import {useAuthStore} from "@/src/store/authStore";
-
+import { router } from "expo-router";
 
 export const LoginScreen = () => {
     const [username, setUsername] = useState("");
@@ -41,7 +41,7 @@ export const LoginScreen = () => {
 
             setUser(user);
 
-            console.log(user);
+            router.replace("/profile");
 
         } catch (error) {
             console.error(error);
