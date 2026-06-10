@@ -21,3 +21,7 @@ export interface User {
 
     profile: UserProfile;
 }
+
+export interface UserDelete {
+    details: string;
+}

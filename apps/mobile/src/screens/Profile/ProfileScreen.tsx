@@ -6,14 +6,23 @@ import {ProfileBio} from "@/src/components/profile/ProfileBio";
 import {ProfileActionButtons} from "@/src/components/profile/ProfileActionButtons";
 import {ProfileTabs} from "@/src/components/profile/ProfileTabs";
 import {PostGrid} from "@/src/components/profile/ProfileGrid";
-import {useState} from "react";
+import {useCallback, useState} from "react";
 import {colors} from "@/src/theme";
 import {useAuthStore} from "@/src/store/authStore";
+import {router} from "expo-router";
 
 export const ProfileScreen = () => {
     const user = useAuthStore(
         (state) => state.user,
     );
+
+    const handleEditProfile = () => {
+        router.push("/profile/edit");
+    };
+
+    const handleSettings = () => {
+        router.push("/profile/settings");
+    };
 
     const [activeTab, setActiveTab] = useState<
         "posts" | "saved"
@@ -46,8 +55,8 @@ export const ProfileScreen = () => {
                 />
 
                 <ProfileActionButtons
-                    onEditProfile={() => {}}
-                    onSettings={() => {}}
+                    onEditProfile={handleEditProfile}
+                    onSettings={handleSettings}
                 />
 
                 <ProfileTabs
