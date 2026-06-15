@@ -5,14 +5,13 @@ import {
     Text,
     StyleSheet,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
 import { login, getMe } from "@niyya/api";
 import {useAuthStore} from "@/src/store/authStore";
-import { router } from "expo-router";
 
 export const LoginScreen = () => {
     const [username, setUsername] = useState("");

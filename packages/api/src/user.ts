@@ -1,4 +1,4 @@
-import {User, UserDelete} from "../../types";
+import {User, UserDelete, UserUpdate} from "../../types";
 import { apiFetch } from "./client";
 
 
@@ -15,7 +15,7 @@ export const getMe = (
 };
 
 export const updateMe = (
-    payload: User,
+    payload: UserUpdate,
     accessToken: string,
 ) => {
     return apiFetch<User>(
