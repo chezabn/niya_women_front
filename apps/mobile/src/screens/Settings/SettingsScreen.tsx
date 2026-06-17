@@ -57,7 +57,7 @@ export const SettingsScreen = () => {
     const handleDelete = async () => {
         Alert.alert(
             "Supprimer le compte",
-            "Cette action est irréversible.",
+            "Votre compte sera désactivé, vos amies ne pourront plus vos contacter sur NiWo. Après 30 jours, votre compte sera définitivement supprimé et toutes vos données seront perdues",
             [
                 {
                     text: "Annuler",

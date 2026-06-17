@@ -15,6 +15,7 @@ export interface User {
     identity_verified: boolean;
 
     is_active: boolean;
+    account_deactivated_by_user: boolean;
 
     is_staff: boolean;
     is_superuser: boolean;
