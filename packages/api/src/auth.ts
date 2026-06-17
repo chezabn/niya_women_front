@@ -37,6 +37,18 @@ export const login = (
     )
 }
 
+export const reactivateAccount = (
+    payload: LoginRequest,
+) => {
+    return apiFetch<LoginResponse>(
+        "/auth/reactivate/",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        }
+    )
+}
+
 export const forgotPassword = (
     payload: ForgotPasswordRequest,
 ) => {

@@ -3,14 +3,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
     View,
     Text,
-    StyleSheet,
+    StyleSheet, Alert,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
-import { login, getMe } from "@niyya/api";
+import {login, getMe, reactivateAccount} from "@niyya/api";
 import {useAuthStore} from "@/src/store/authStore";
 
 export const LoginScreen = () => {
@@ -52,8 +52,45 @@ export const LoginScreen = () => {
 
             router.replace("/profile");
 
-        } catch (error) {
-            console.error(error);
+        } catch (error: any) {
+
+            if (
+                error?.code === "ACCOUNT_DEACTIVATED"
+            ) {
+                Alert.alert(
+                    "Compte désactivé",
+                    "Vous avez précédemment désactivé votre compte. Souhaitez-vous le réactiver ?",
+                    [
+                        {
+                            text: "Annuler",
+                            style: "cancel",
+                        },
+                        {
+                            text: "Réactiver",
+                            onPress: async () => {
+                                try {
+                                    await reactivateAccount(
+                                        {
+                                            username,
+                                            password,
+                                        }
+                                    )
+
+                                    Alert.alert(
+                                        "Compte réactivé",
+                                        "Vous pouvez maintenant vous reconnecter."
+                                    );
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            },
+                        },
+                    ],
+                );
+
+                return;
+            }
+
         }
     };
 
