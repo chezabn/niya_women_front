@@ -9,7 +9,7 @@ import {
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/ui/Input";
 import { colors } from "@/src/theme";
-import { sendVerificationEmail, verifyEmail } from "@niyya/api";
+import {getMe, sendVerificationEmail, verifyEmail} from "@niyya/api";
 import { useAuthStore } from "@/src/store/authStore";
 import { router } from "expo-router";
 
@@ -44,6 +44,9 @@ export const VerifyEmailScreen = () => {
         return `${minutes}:${secs.toString().padStart(2, "0")}`;
     };
 
+    const {
+        setUser,
+    } = useAuthStore();
     const accessToken = useAuthStore(
         (state) => state.accessToken
     );
@@ -74,14 +77,16 @@ export const VerifyEmailScreen = () => {
                 throw new Error("Utilisateur non authentifié");
             }
 
-            const response = await verifyEmail(
+            await verifyEmail(
                 {
                     code: verificationCode,
                 },
                 accessToken,
             );
 
-            console.log(response.detail);
+            const user = await getMe(accessToken)
+
+            setUser(user)
 
             router.replace("/identity-verification");
 

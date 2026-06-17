@@ -40,6 +40,16 @@ export const LoginScreen = () => {
 
             setUser(user);
 
+            if (!user.email_verified) {
+                router.replace("/verify-email");
+                return;
+            }
+
+            if (!user.identity_verified) {
+                router.replace("/identity-verification");
+                return;
+            }
+
             router.replace("/profile");
 
         } catch (error) {
@@ -99,9 +109,6 @@ export const LoginScreen = () => {
                         Inscrivez-vous maintenant
                     </Link>
                 </Text>
-                <Link href="/admin-review" style={styles.link}>
-                    Inscrivez-vous maintenant
-                </Link>
             </View>
         </SafeAreaView>
     );
