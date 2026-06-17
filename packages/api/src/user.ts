@@ -35,7 +35,6 @@ export const deleteMe = (
         "/users/me/",
         {
             method: "DELETE",
-            body: JSON.stringify(accessToken),
         },
         accessToken,
     )

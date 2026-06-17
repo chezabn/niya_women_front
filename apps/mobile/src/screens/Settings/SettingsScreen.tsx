@@ -1,21 +1,20 @@
 import React from "react";
-import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import {Alert, ScrollView, StyleSheet, Text, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {router} from "expo-router";
 
-import { colors } from "@/src/theme";
-import { SettingsItem } from "@/src/components/settings/SettingsItem";
-import { useAuthStore } from "@/src/store/authStore";
+import {colors} from "@/src/theme";
+import {SettingsItem} from "@/src/components/settings/SettingsItem";
+import {useAuthStore} from "@/src/store/authStore";
+import {deleteMe} from "@niyya/api";
 
 export const SettingsScreen = () => {
     const logout = useAuthStore(
         (state) => state.logout,
+    );
+
+    const accessToken = useAuthStore(
+        (state) => state.accessToken,
     );
 
     const handleLogout = () => {
@@ -32,6 +31,43 @@ export const SettingsScreen = () => {
                     style: "destructive",
                     onPress: () => {
                         logout();
+                        router.replace("/login");
+                    },
+                },
+            ],
+        );
+    };
+
+    const deleteAccount = async () => {
+        try {
+            if (!accessToken) {
+                return;
+            }
+
+            await deleteMe(
+                accessToken,
+            )
+
+            logout();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleDelete = async () => {
+        Alert.alert(
+            "Supprimer le compte",
+            "Cette action est irréversible.",
+            [
+                {
+                    text: "Annuler",
+                    style: "cancel",
+                },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: () => {
+                        deleteAccount();
                         router.replace("/login");
                     },
                 },
@@ -147,7 +183,7 @@ export const SettingsScreen = () => {
                     <SettingsItem
                         title="Supprimer mon compte"
                         danger
-                        onPress={handleLogout}
+                        onPress={handleDelete}
                     />
                 </View>
 
