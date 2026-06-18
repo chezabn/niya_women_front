@@ -52,7 +52,7 @@ export const EditProfileScreen = () => {
 
             setUser(updatedUser);
 
-            router.replace("/profile");
+            router.replace("/(tabs)/profile");
         } catch (error) {
             console.error(error);
         }

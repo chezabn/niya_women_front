@@ -50,7 +50,7 @@ export const LoginScreen = () => {
                 return;
             }
 
-            router.replace("/profile");
+            router.replace("/(tabs)");
 
         } catch (error: any) {
 
