@@ -94,6 +94,14 @@ export const ProfileScreen = () => {
                     accessToken,
                 );
 
+            console.log(
+                JSON.stringify(
+                    publications,
+                    null,
+                    2,
+                )
+            );
+
             setPosts(publications);
         } catch (error) {
             console.error(error);
