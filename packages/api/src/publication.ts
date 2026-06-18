@@ -1,26 +1,30 @@
 import { apiFetch } from "./client";
 
 import type {
-    Publication,
-    PublicationCreate,
-    PublicationUpdate,
-    PublicationLikeResponse,
+    ApiDetailResponse,
     Comment,
     CommentCreate,
-    CursorPaginationResponse,
+    FeedResponse,
+    Publication,
+    PublicationCreate,
+    PublicationDetail,
+    PublicationUpdate,
 } from "../../types";
 
 
 
-/**
- * Publications
- */
-
 export async function getFeed(
     accessToken: string,
-): Promise<CursorPaginationResponse<Publication>> {
-    return apiFetch(
-        "/publications/",
+    cursor?: string,
+): Promise<FeedResponse> {
+    let endpoint = "/publications/";
+
+    if (cursor) {
+        endpoint += `?cursor=${cursor}`;
+    }
+
+    return apiFetch<FeedResponse>(
+        endpoint,
         {
             method: "GET",
         },
@@ -28,11 +32,13 @@ export async function getFeed(
     );
 }
 
+
+
 export async function getPublication(
     publicationId: number,
     accessToken: string,
-): Promise<Publication> {
-    return apiFetch(
+): Promise<PublicationDetail> {
+    return apiFetch<PublicationDetail>(
         `/publications/${publicationId}/`,
         {
             method: "GET",
@@ -41,26 +47,51 @@ export async function getPublication(
     );
 }
 
+
+
 export async function createPublication(
     data: PublicationCreate,
     accessToken: string,
-): Promise<Publication> {
-    return apiFetch(
-        "/publications/",
+): Promise<PublicationDetail> {
+    const formData = new FormData();
+
+    formData.append(
+        "caption",
+        data.caption,
+    );
+
+    formData.append(
+        "comments_enabled",
+        String(data.comments_enabled),
+    );
+
+    if (data.files) {
+        data.files.forEach((file) => {
+            formData.append(
+                "files",
+                file,
+            );
+        });
+    }
+
+    return apiFetch<PublicationDetail>(
+        "/publications/publications/",
         {
             method: "POST",
-            body: JSON.stringify(data),
+            body: formData,
         },
         accessToken,
     );
 }
 
+
+
 export async function updatePublication(
     publicationId: number,
     data: PublicationUpdate,
     accessToken: string,
-): Promise<Publication> {
-    return apiFetch(
+): Promise<PublicationDetail> {
+    return apiFetch<PublicationDetail>(
         `/publications/${publicationId}/`,
         {
             method: "PATCH",
@@ -69,6 +100,8 @@ export async function updatePublication(
         accessToken,
     );
 }
+
+
 
 export async function deletePublication(
     publicationId: number,
@@ -85,15 +118,11 @@ export async function deletePublication(
 
 
 
-/**
- * Likes
- */
-
 export async function likePublication(
     publicationId: number,
     accessToken: string,
-): Promise<PublicationLikeResponse> {
-    return apiFetch(
+): Promise<ApiDetailResponse> {
+    return apiFetch<ApiDetailResponse>(
         `/publications/${publicationId}/like/`,
         {
             method: "POST",
@@ -102,11 +131,13 @@ export async function likePublication(
     );
 }
 
+
+
 export async function unlikePublication(
     publicationId: number,
     accessToken: string,
-): Promise<PublicationLikeResponse> {
-    return apiFetch(
+): Promise<ApiDetailResponse> {
+    return apiFetch<ApiDetailResponse>(
         `/publications/${publicationId}/unlike/`,
         {
             method: "DELETE",
@@ -117,15 +148,11 @@ export async function unlikePublication(
 
 
 
-/**
- * Comments
- */
-
 export async function getComments(
     publicationId: number,
     accessToken: string,
 ): Promise<Comment[]> {
-    return apiFetch(
+    return apiFetch<Comment[]>(
         `/publications/${publicationId}/comments/`,
         {
             method: "GET",
@@ -134,46 +161,18 @@ export async function getComments(
     );
 }
 
+
+
 export async function createComment(
     publicationId: number,
     data: CommentCreate,
     accessToken: string,
 ): Promise<Comment> {
-    return apiFetch(
+    return apiFetch<Comment>(
         `/publications/${publicationId}/comments/`,
         {
             method: "POST",
             body: JSON.stringify(data),
-        },
-        accessToken,
-    );
-}
-
-export async function updateComment(
-    publicationId: number,
-    commentId: number,
-    data: CommentCreate,
-    accessToken: string,
-): Promise<Comment> {
-    return apiFetch(
-        `/publications/${publicationId}/comments/${commentId}/`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(data),
-        },
-        accessToken,
-    );
-}
-
-export async function deleteComment(
-    publicationId: number,
-    commentId: number,
-    accessToken: string,
-): Promise<void> {
-    await apiFetch(
-        `/publications/${publicationId}/comments/${commentId}/`,
-        {
-            method: "DELETE",
         },
         accessToken,
     );

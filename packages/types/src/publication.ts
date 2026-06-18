@@ -1,18 +1,16 @@
-import { UserPreview } from "./user";
-
-export type MediaType = "IMAGE" | "VIDEO";
+import { User } from "./user";
 
 export interface PublicationMedia {
     id: number;
     file: string;
-    media_type: MediaType;
+    media_type: "IMAGE" | "VIDEO";
     order: number;
 }
 
 export interface Publication {
     id: number;
 
-    author: UserPreview;
+    author: User;
 
     caption: string;
 
@@ -23,17 +21,38 @@ export interface Publication {
 
     is_liked: boolean;
 
-    comments_enabled?: boolean;
+    is_edited: boolean;
+
+    created_at: string;
+}
+
+export interface PublicationDetail {
+    id: number;
+
+    author: User;
+
+    caption: string;
+
+    medias: PublicationMedia[];
+
+    likes_count: number;
+    comments_count: number;
+
+    is_liked: boolean;
+
+    comments_enabled: boolean;
 
     is_edited: boolean;
 
     created_at: string;
-    updated_at?: string;
+    updated_at: string;
 }
 
 export interface PublicationCreate {
     caption: string;
-    comments_enabled?: boolean;
+    comments_enabled: boolean;
+
+    files?: File[];
 }
 
 export interface PublicationUpdate {
@@ -41,16 +60,12 @@ export interface PublicationUpdate {
     comments_enabled?: boolean;
 }
 
-export interface PublicationLikeResponse {
-    detail: string;
-}
-
 export interface Comment {
     id: number;
 
     description: string;
 
-    author: UserPreview;
+    author: User;
 
     created_at: string;
 }
@@ -59,8 +74,12 @@ export interface CommentCreate {
     description: string;
 }
 
-export interface CursorPaginationResponse<T> {
+export interface FeedResponse {
     next: string | null;
     previous: string | null;
-    results: T[];
+    results: Publication[];
+}
+
+export interface ApiDetailResponse {
+    detail: string;
 }
