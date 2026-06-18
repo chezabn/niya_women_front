@@ -17,7 +17,7 @@ export async function getFeed(
     accessToken: string,
     cursor?: string,
 ): Promise<FeedResponse> {
-    let endpoint = "/publications/";
+    let endpoint = "/publications/publications/";
 
     if (cursor) {
         endpoint += `?cursor=${cursor}`;
@@ -39,7 +39,20 @@ export async function getPublication(
     accessToken: string,
 ): Promise<PublicationDetail> {
     return apiFetch<PublicationDetail>(
-        `/publications/${publicationId}/`,
+        `/publications/publications/${publicationId}/`,
+        {
+            method: "GET",
+        },
+        accessToken,
+    );
+}
+
+
+export async function getMyPublications(
+    accessToken: string,
+): Promise<Publication[]> {
+    return apiFetch<Publication[]>(
+        "/publications/publications/me/",
         {
             method: "GET",
         },
@@ -92,7 +105,7 @@ export async function updatePublication(
     accessToken: string,
 ): Promise<PublicationDetail> {
     return apiFetch<PublicationDetail>(
-        `/publications/${publicationId}/`,
+        `/publications/publications/${publicationId}/`,
         {
             method: "PATCH",
             body: JSON.stringify(data),
@@ -108,7 +121,7 @@ export async function deletePublication(
     accessToken: string,
 ): Promise<void> {
     await apiFetch(
-        `/publications/${publicationId}/`,
+        `/publications/publications/${publicationId}/`,
         {
             method: "DELETE",
         },
@@ -123,7 +136,7 @@ export async function likePublication(
     accessToken: string,
 ): Promise<ApiDetailResponse> {
     return apiFetch<ApiDetailResponse>(
-        `/publications/${publicationId}/like/`,
+        `/publications/publications/${publicationId}/like/`,
         {
             method: "POST",
         },
@@ -138,7 +151,7 @@ export async function unlikePublication(
     accessToken: string,
 ): Promise<ApiDetailResponse> {
     return apiFetch<ApiDetailResponse>(
-        `/publications/${publicationId}/unlike/`,
+        `/publications/publications/${publicationId}/unlike/`,
         {
             method: "DELETE",
         },
@@ -153,7 +166,7 @@ export async function getComments(
     accessToken: string,
 ): Promise<Comment[]> {
     return apiFetch<Comment[]>(
-        `/publications/${publicationId}/comments/`,
+        `/publications/publications/${publicationId}/comments/`,
         {
             method: "GET",
         },
@@ -169,7 +182,7 @@ export async function createComment(
     accessToken: string,
 ): Promise<Comment> {
     return apiFetch<Comment>(
-        `/publications/${publicationId}/comments/`,
+        `/publications/publications/${publicationId}/comments/`,
         {
             method: "POST",
             body: JSON.stringify(data),
