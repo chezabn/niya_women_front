@@ -3,6 +3,14 @@ export interface UserProfile {
     post_count: number;
 }
 
+export interface UserPreview {
+    id: number;
+    username: string;
+
+    first_name: string;
+    last_name: string;
+}
+
 export interface User {
     id: number;
     username: string;
