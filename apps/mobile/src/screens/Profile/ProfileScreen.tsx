@@ -61,6 +61,10 @@ export const ProfileScreen = () => {
         router.push("/profile/edit");
     };
 
+    const handleJournal = () => {
+        router.push("/journal");
+    };
+
     const handleSettings = () => {
         router.push("/profile/settings");
     };
@@ -187,6 +191,9 @@ export const ProfileScreen = () => {
                 <ProfileActionButtons
                     onEditProfile={
                         handleEditProfile
+                    }
+                    onJournal={
+                        handleJournal
                     }
                     onSettings={
                         handleSettings

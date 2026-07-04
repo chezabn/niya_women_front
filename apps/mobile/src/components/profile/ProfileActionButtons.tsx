@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
     View,
     StyleSheet,
@@ -8,29 +9,36 @@ import { Button } from "@/src/components/ui/Button";
 
 interface Props {
     onEditProfile: () => void;
+    onJournal: () => void;
     onSettings: () => void;
 }
 
 export const ProfileActionButtons = ({
                                          onEditProfile,
+                                         onJournal,
                                          onSettings,
                                      }: Props) => {
     return (
         <View style={styles.container}>
-            <View style={styles.button}>
-                <Button
-                    text="Modifier"
-                    onPress={
-                        onEditProfile
-                    }
-                />
-            </View>
+            <Button
+                text="Mon journal"
+                onPress={onJournal}
+            />
 
-            <View style={styles.button}>
-                <Button
-                    text="Paramètres"
-                    onPress={onSettings}
-                />
+            <View style={styles.row}>
+                <View style={styles.button}>
+                    <Button
+                        text="Modifier"
+                        onPress={onEditProfile}
+                    />
+                </View>
+
+                <View style={styles.button}>
+                    <Button
+                        text="Paramètres"
+                        onPress={onSettings}
+                    />
+                </View>
             </View>
         </View>
     );
@@ -38,9 +46,13 @@ export const ProfileActionButtons = ({
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: "row",
         gap: 12,
         marginBottom: 24,
+    },
+
+    row: {
+        flexDirection: "row",
+        gap: 12,
     },
 
     button: {
