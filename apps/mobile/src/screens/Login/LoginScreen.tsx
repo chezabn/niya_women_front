@@ -12,10 +12,12 @@ import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
 import {login, getMe, reactivateAccount} from "@niyya/api";
 import {useAuthStore} from "@/src/store/authStore";
+import { AlertBanner } from "@/src/components/ui/AlertBanner";
 
 export const LoginScreen = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
     const {
         setTokens,
@@ -24,6 +26,7 @@ export const LoginScreen = () => {
 
     const handleLogin = async () => {
         try {
+            setErrorMessage("");
             const tokens = await login({
                 username,
                 password,
@@ -53,7 +56,7 @@ export const LoginScreen = () => {
             router.replace("/(tabs)");
 
         } catch (error: any) {
-
+            console.error(error);
             if (
                 error?.code === "ACCOUNT_DEACTIVATED"
             ) {
@@ -69,28 +72,31 @@ export const LoginScreen = () => {
                             text: "Réactiver",
                             onPress: async () => {
                                 try {
-                                    await reactivateAccount(
-                                        {
-                                            username,
-                                            password,
-                                        }
-                                    )
+                                    await reactivateAccount({
+                                        username,
+                                        password,
+                                    });
 
                                     Alert.alert(
                                         "Compte réactivé",
-                                        "Vous pouvez maintenant vous reconnecter."
+                                        "Vous pouvez maintenant vous reconnecter.",
                                     );
                                 } catch (e) {
                                     console.error(e);
+                                    setErrorMessage(
+                                        "Impossible de réactiver votre compte.",
+                                    );
                                 }
                             },
                         },
                     ],
                 );
-
                 return;
             }
-
+            setErrorMessage(
+                error?.detail ||
+                "Une erreur est survenue lors de la connexion.",
+            );
         }
     };
 
@@ -104,6 +110,12 @@ export const LoginScreen = () => {
                 <Text style={styles.subtitle}>
                     Connectez-vous à votre compte
                 </Text>
+
+                <AlertBanner
+                    type="error"
+                    visible={!!errorMessage}
+                    message={errorMessage}
+                />
 
                 <Input
                     placeholder="Nom d'utilisateur"
