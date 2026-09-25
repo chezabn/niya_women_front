@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import {
-    FlatList,
+    FlatList, RefreshControl,
     StyleSheet,
 } from "react-native";
 
@@ -80,6 +80,12 @@ export const JournalScreen = () => {
                 }
                 contentContainerStyle={
                     styles.content
+                }
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loading}
+                        onRefresh={loadJournals}
+                    />
                 }
             />
 
