@@ -20,3 +20,9 @@ export interface PublicationListResponse {
     previous: string | null;
     results: Publication[];
 }
+
+export interface PublicationUpdate {
+    caption: string;
+    comments_enabled: boolean;
+    is_archived: boolean;
+}

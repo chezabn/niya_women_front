@@ -1,4 +1,4 @@
-import {Journal, Publication, PublicationListResponse} from "../../types";
+import {Journal, JournalUpdate, Publication, PublicationListResponse, PublicationUpdate} from "../../types";
 import {apiFetch} from "./client";
 
 export async function getMyPublications(
@@ -18,6 +18,21 @@ export async function getMyPublication(
     return apiFetch<Publication>(
         `/publications/publications/${publicationId}/`,
         undefined,
+        accessToken,
+    )
+}
+
+export async function updatePublication(
+    accessToken: string,
+    pageId: number,
+    newPublication: PublicationUpdate,
+): Promise<Publication> {
+    return apiFetch<Publication>(
+        `/publications/publications/${pageId}/`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(newPublication),
+        },
         accessToken,
     )
 }
