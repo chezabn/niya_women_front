@@ -18,3 +18,9 @@ export interface JournalUpdate {
     title: string;
     page: string;
 }
+
+export interface JournalCreate {
+    title: string;
+    page: string;
+    date: string;
+}
