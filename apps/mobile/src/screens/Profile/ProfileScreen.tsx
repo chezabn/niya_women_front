@@ -252,9 +252,9 @@ export const ProfileScreen = () => {
                 }
             >
                 <ProfileHeader
-                    username={
-                        user.username
-                    }
+                    username={user.username}
+                    onEditProfile={handleEditProfile}
+                    onSettings={handleSettings}
                 />
 
                 <ProfileStats
@@ -279,14 +279,8 @@ export const ProfileScreen = () => {
                 />
 
                 <ProfileActionButtons
-                    onEditProfile={
-                        handleEditProfile
-                    }
                     onJournal={
                         handleJournal
-                    }
-                    onSettings={
-                        handleSettings
                     }
                 />
 

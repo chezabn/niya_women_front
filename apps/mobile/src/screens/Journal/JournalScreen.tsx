@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import {
-    FlatList, RefreshControl,
+    FlatList,
+    RefreshControl,
     StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,6 +15,8 @@ import {
     useFocusEffect,
 } from "expo-router";
 
+import { Ionicons } from "@expo/vector-icons";
+
 import { colors } from "@/src/theme";
 
 import { JournalHeader } from "@/src/components/journal/JournalHeader";
@@ -20,12 +25,12 @@ import { JournalEmptyState } from "@/src/components/journal/JournalEmptyState";
 import { NewJournalButton } from "@/src/components/journal/NewJournalButton";
 
 import { getMyJournals } from "@niyya/api";
-import { Journal } from "@niyya/types"
+import { Journal } from "@niyya/types";
 import { useAuthStore } from "@/src/store/authStore";
 
 export const JournalScreen = () => {
     const accessToken = useAuthStore(
-        (state) => state.accessToken
+        (state) => state.accessToken,
     );
 
     const [entries, setEntries] = useState<Journal[]>([]);
@@ -37,13 +42,15 @@ export const JournalScreen = () => {
         try {
             setLoading(true);
 
-            const journals = await getMyJournals(accessToken);
+            const journals = await getMyJournals(
+                accessToken,
+            );
 
             setEntries(journals);
         } catch (error) {
             console.error(
                 "Erreur lors du chargement des journaux :",
-                error
+                error,
             );
         } finally {
             setLoading(false);
@@ -70,13 +77,29 @@ export const JournalScreen = () => {
                         date={item.date}
                         onPress={() =>
                             router.push(
-                                `/journal/${item.id}`
+                                `/journal/${item.id}`,
                             )
                         }
                     />
                 )}
                 ListHeaderComponent={
-                    <JournalHeader />
+                    <View>
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() =>
+                                router.back()
+                            }
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons
+                                name="arrow-back"
+                                size={26}
+                                color={colors.black}
+                            />
+                        </TouchableOpacity>
+
+                        <JournalHeader />
+                    </View>
                 }
                 ListEmptyComponent={
                     !loading ? (
@@ -114,5 +137,13 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         paddingBottom: 20,
         flexGrow: 1,
+    },
+
+    backButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
     },
 });

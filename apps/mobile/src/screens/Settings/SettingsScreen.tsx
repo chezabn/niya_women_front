@@ -1,7 +1,25 @@
 import React from "react";
-import {Alert, ScrollView, StyleSheet, Text, View,} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {router} from "expo-router";
+
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+
+import {
+    SafeAreaView,
+} from "react-native-safe-area-context";
+
+import {
+    router,
+} from "expo-router";
+
+import {
+    Ionicons,
+} from "@expo/vector-icons";
 
 import {colors} from "@/src/theme";
 import {SettingsItem} from "@/src/components/settings/SettingsItem";
@@ -46,7 +64,7 @@ export const SettingsScreen = () => {
 
             await deleteMe(
                 accessToken,
-            )
+            );
 
             logout();
         } catch (error) {
@@ -80,9 +98,27 @@ export const SettingsScreen = () => {
             <ScrollView
                 contentContainerStyle={styles.content}
             >
-                <Text style={styles.title}>
-                    Paramètres
-                </Text>
+                <View style={styles.header}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="arrow-back"
+                            size={26}
+                            color={colors.black}
+                        />
+                    </TouchableOpacity>
+
+                    <Text style={styles.title}>
+                        Paramètres
+                    </Text>
+
+                    <View
+                        style={styles.headerSpacer}
+                    />
+                </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
@@ -92,17 +128,20 @@ export const SettingsScreen = () => {
                     <SettingsItem
                         title="Modifier mon profil"
                         onPress={() =>
-                            router.push("/profile/edit")
+                            router.push(
+                                "/profile/edit",
+                            )
                         }
                     />
 
                     <SettingsItem
                         title="Changer mon mot de passe"
                         onPress={() =>
-                            router.push("/reset-password") // TODO A changer
+                            router.push(
+                                "/reset-password",
+                            )
                         }
                     />
-
                 </View>
 
                 <View style={styles.section}>
@@ -112,7 +151,7 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Notifications"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
 
                     <SettingsItem
@@ -122,14 +161,13 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Confidentialité"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
 
                     <SettingsItem
                         title="Mes données"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
-
                 </View>
 
                 <View style={styles.section}>
@@ -139,12 +177,12 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Signaler un problème"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
 
                     <SettingsItem
                         title="Centre d'aide"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
                 </View>
 
@@ -155,17 +193,17 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Politique de confidentalité"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
 
                     <SettingsItem
                         title="Conditions d'utilisation"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
 
                     <SettingsItem
                         title="À propos"
-                        onPress={handleLogout} // TODO A changer
+                        onPress={handleLogout}
                     />
                 </View>
 
@@ -196,7 +234,6 @@ export const SettingsScreen = () => {
                         Conçu à Paris
                     </Text>
                 </View>
-
             </ScrollView>
         </SafeAreaView>
     );
@@ -212,10 +249,29 @@ const styles = StyleSheet.create({
         padding: 24,
     },
 
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 32,
+    },
+
+    backButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    headerSpacer: {
+        width: 44,
+        height: 44,
+    },
+
     title: {
+        flex: 1,
         fontSize: 26,
         fontWeight: "700",
-        marginBottom: 32,
         textAlign: "center",
     },
 
