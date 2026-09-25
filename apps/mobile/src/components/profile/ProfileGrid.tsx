@@ -2,6 +2,7 @@ import React from "react";
 
 import {
     FlatList,
+    Pressable,
     StyleSheet,
     Text,
     View,
@@ -16,11 +17,15 @@ import { colors } from "@/src/theme";
 
 interface Props {
     posts: Publication[];
+    onPress: (
+        publication: Publication,
+    ) => void;
 }
 
 
 export const PostGrid = ({
     posts,
+    onPress,
 }: Props) => {
     return (
         <FlatList
@@ -33,10 +38,15 @@ export const PostGrid = ({
                 styles.container
             }
             renderItem={({ item }) => (
-                <View
-                    style={
-                        styles.post
+                <Pressable
+                    onPress={() =>
+                        onPress(item)
                     }
+                    style={({ pressed }) => [
+                        styles.post,
+                        pressed &&
+                            styles.pressed,
+                    ]}
                 >
                     <View
                         style={
@@ -97,7 +107,7 @@ export const PostGrid = ({
                             </Text>
                         )}
                     </View>
-                </View>
+                </Pressable>
             )}
         />
     );
@@ -136,6 +146,10 @@ const styles =
             borderWidth: 1,
             borderColor: "#EEE",
             borderRadius: 12,
+        },
+
+        pressed: {
+            opacity: 0.7,
         },
 
         header: {

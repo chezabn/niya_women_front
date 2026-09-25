@@ -102,6 +102,13 @@ export const ProfileScreen = () => {
         );
     };
 
+    const handlePublicationPress = (
+        publication: Publication,
+    ) => {
+        router.push(
+            `/publications/${publication.id}`,
+        );
+    };
 
     const handleSettings = () => {
         router.push(
@@ -296,9 +303,8 @@ export const ProfileScreen = () => {
                     "posts" &&
                     posts.length > 0 && (
                         <PostGrid
-                            posts={
-                                posts
-                            }
+                            posts={posts}
+                            onPress={handlePublicationPress}
                         />
                     )}
             </ScrollView>
