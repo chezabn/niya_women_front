@@ -250,7 +250,7 @@ export const ForYouScreen = () => {
      */
     const handleCreatePublication = () => {
         router.push(
-            "/publications/new",
+            "/new-publication",
         );
     };
 
