@@ -1,7 +1,4 @@
-import React, {
-    useCallback,
-    useState,
-} from "react";
+import React, { useCallback, useState } from "react";
 
 import {
     ActivityIndicator,
@@ -35,7 +32,6 @@ import {
 
 import { useAuthStore } from "@/src/store/authStore";
 
-
 const getPublicationById = async (
     id: string,
     accessToken: string,
@@ -46,7 +42,6 @@ const getPublicationById = async (
     );
 };
 
-
 const deletePublicationById = async (
     id: number,
     accessToken: string,
@@ -56,7 +51,6 @@ const deletePublicationById = async (
         id,
     );
 };
-
 
 export const PublicationDetailScreen = () => {
     const { id } =
@@ -70,6 +64,12 @@ export const PublicationDetailScreen = () => {
                 state.accessToken,
         );
 
+    const user =
+        useAuthStore(
+            (state) =>
+                state.user,
+        );
+
     const [
         publication,
         setPublication,
@@ -81,7 +81,6 @@ export const PublicationDetailScreen = () => {
         loading,
         setLoading,
     ] = useState(true);
-
 
     useFocusEffect(
         useCallback(() => {
@@ -124,11 +123,21 @@ export const PublicationDetailScreen = () => {
         ]),
     );
 
+    /*
+     * Une seule page de détail est utilisée
+     * pour les publications personnelles et
+     * les publications des autres utilisatrices.
+     */
+    const isOwner =
+        !!user &&
+        !!publication &&
+        user.id === publication.author.id;
 
     const handleDelete = () => {
         if (
             !publication ||
-            !accessToken
+            !accessToken ||
+            !isOwner
         ) {
             return;
         }
@@ -169,9 +178,11 @@ export const PublicationDetailScreen = () => {
         );
     };
 
-
     const handleEdit = () => {
-        if (!publication) {
+        if (
+            !publication ||
+            !isOwner
+        ) {
             return;
         }
 
@@ -179,7 +190,6 @@ export const PublicationDetailScreen = () => {
             `/publications/${publication.id}/edit`,
 );
 };
-
 
 if (loading) {
     return (
@@ -204,7 +214,6 @@ if (loading) {
     );
 }
 
-
 if (!publication) {
     return (
         <SafeAreaView
@@ -226,21 +235,18 @@ if (!publication) {
     );
 }
 
-
 return (
     <SafeAreaView
         style={
             styles.container
         }
     >
-
         {/* Header */}
         <View
             style={
                 styles.header
             }
         >
-
             <TouchableOpacity
                 style={
                     styles.headerButton
@@ -259,25 +265,24 @@ return (
                 />
             </TouchableOpacity>
 
-
-            <TouchableOpacity
-                style={
-                    styles.headerButton
-                }
-                onPress={
-                    handleDelete
-                }
-                activeOpacity={0.7}
-            >
-                <Ionicons
-                    name="trash-outline"
-                    size={24}
-                    color="#D9534F"
-                />
-            </TouchableOpacity>
-
+            {isOwner && (
+                <TouchableOpacity
+                    style={
+                        styles.headerButton
+                    }
+                    onPress={
+                        handleDelete
+                    }
+                    activeOpacity={0.7}
+                >
+                    <Ionicons
+                        name="trash-outline"
+                        size={24}
+                        color="#D9534F"
+                    />
+                </TouchableOpacity>
+            )}
         </View>
-
 
         {/* Content */}
         <ScrollView
@@ -300,7 +305,6 @@ return (
                 }
             </Text>
 
-
             {publication.caption ? (
                 <Text
                     style={
@@ -308,12 +312,10 @@ return (
                     }
                 >
                     {
-                        publication
-                            .caption
+                        publication.caption
                     }
                 </Text>
             ) : null}
-
 
             {publication.is_edited && (
                 <Text
@@ -325,7 +327,6 @@ return (
                 </Text>
             )}
 
-
             <Text
                 style={
                     styles.date
@@ -335,7 +336,6 @@ return (
                     publication.created_at,
                 )}
             </Text>
-
 
             <Text
                 style={
@@ -347,28 +347,26 @@ return (
                     ? "Commentaires activés"
                     : "Commentaires désactivés"}
             </Text>
-
         </ScrollView>
 
-
-        {/* Bottom action */}
-        <View
-            style={
-                styles.bottom
-            }
-        >
-            <Button
-                text="Modifier"
-                onPress={
-                    handleEdit
+        {/* Owner action */}
+        {isOwner && (
+            <View
+                style={
+                    styles.bottom
                 }
-            />
-        </View>
-
+            >
+                <Button
+                    text="Modifier"
+                    onPress={
+                        handleEdit
+                    }
+                />
+            </View>
+        )}
     </SafeAreaView>
 );
 };
-
 
 const formatDate = (
     date: string,
@@ -384,7 +382,6 @@ const formatDate = (
         },
     );
 };
-
 
 const styles =
     StyleSheet.create({

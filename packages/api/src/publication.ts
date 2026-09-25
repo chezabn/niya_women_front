@@ -5,6 +5,17 @@ import {
 } from "../../types";
 import {apiFetch} from "./client";
 
+
+export async function geAllPublications(
+    accessToken: string,
+): Promise<PublicationListResponse> {
+    return apiFetch<PublicationListResponse>(
+        "/publications/publications/",
+        undefined,
+        accessToken,
+    );
+}
+
 export async function getMyPublications(
     accessToken: string,
 ): Promise<PublicationListResponse> {
