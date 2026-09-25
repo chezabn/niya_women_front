@@ -12,6 +12,8 @@ export interface Publication {
     is_edited: boolean;
     comments_enabled: boolean;
     is_archived: boolean;
+    like_count: number;
+    is_liked: boolean;
 }
 
 export interface PublicationListResponse {

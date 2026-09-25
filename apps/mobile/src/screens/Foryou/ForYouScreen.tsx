@@ -22,7 +22,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/src/theme";
 
 import {
-    geAllPublications,
+    geAllPublications, likePublication, unlikePublication,
 } from "@niyya/api";
 
 import {
@@ -57,13 +57,17 @@ const formatDate = (
 interface PublicationCardProps {
     publication: Publication;
     onPress: () => void;
+    onLike: () => void;
 }
 
 
+
 const PublicationCard = ({
-    publication,
-    onPress,
-}: PublicationCardProps) => {
+     publication,
+     onPress,
+     onLike,
+ }: PublicationCardProps) => {
+
     return (
         <Pressable
             onPress={onPress}
@@ -126,30 +130,44 @@ const PublicationCard = ({
 
             {/* Footer */}
             <View style={styles.cardFooter}>
-                <View
-                    style={
-                        styles.commentContainer
-                    }
-                >
-                    <Ionicons
-                        name={
-                            publication.comments_enabled
-                                ? "chatbubble-outline"
-                                : "chatbubble-outline"
-                        }
-                        size={17}
-                        color="#888"
-                    />
-
-                    <Text
-                        style={
-                            styles.commentText
-                        }
+                <View style={styles.interactionContainer}>
+                    <Pressable
+                        style={styles.likeContainer}
+                        onPress={onLike}
+                        hitSlop={8}
                     >
-                        {publication.comments_enabled
-                            ? "Commentaires"
-                            : "Commentaires désactivés"}
-                    </Text>
+                        <Ionicons
+                            name={
+                                publication.is_liked
+                                    ? "heart"
+                                    : "heart-outline"
+                            }
+                            size={19}
+                            color={
+                                publication.is_liked
+                                    ? "#E88A9A"
+                                    : "#888"
+                            }
+                        />
+
+                        <Text style={styles.likeText}>
+                            {publication.like_count}
+                        </Text>
+                    </Pressable>
+
+                    <View style={styles.commentContainer}>
+                        <Ionicons
+                            name="chatbubble-outline"
+                            size={17}
+                            color="#888"
+                        />
+
+                        <Text style={styles.commentText}>
+                            {publication.comments_enabled
+                                ? "Commentaires"
+                                : "Commentaires désactivés"}
+                        </Text>
+                    </View>
                 </View>
 
                 <Ionicons
@@ -254,6 +272,39 @@ export const ForYouScreen = () => {
         );
     };
 
+    const handleLike = async (
+        publication: Publication,
+    ) => {
+        if (!accessToken) {
+            return;
+        }
+
+        try {
+            const updatedPublication =
+                publication.is_liked
+                    ? await unlikePublication(
+                        accessToken,
+                        publication.id,
+                    )
+                    : await likePublication(
+                        accessToken,
+                        publication.id,
+                    );
+
+            setPublications((current) =>
+                current.map((item) =>
+                    item.id === updatedPublication.id
+                        ? updatedPublication
+                        : item,
+                ),
+            );
+        } catch (error) {
+            console.error(
+                "Erreur lors de la modification du like :",
+                error,
+            );
+        }
+    };
 
     /*
      * Chargement
@@ -338,6 +389,9 @@ export const ForYouScreen = () => {
                             handlePublicationPress(
                                 item,
                             )
+                        }
+                        onLike={() =>
+                            handleLike(item)
                         }
                     />
                 )}
@@ -464,6 +518,23 @@ const styles = StyleSheet.create({
         height: 7,
         borderRadius: 4,
         backgroundColor: "#D9534F",
+    },
+
+    interactionContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 18,
+    },
+
+    likeContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    likeText: {
+        fontSize: 12,
+        color: "#888",
+        marginLeft: 6,
     },
 
     /*

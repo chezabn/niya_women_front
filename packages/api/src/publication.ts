@@ -1,9 +1,11 @@
 import {
-    Publication, PublicationCreate,
+    Publication,
+    PublicationCreate,
     PublicationListResponse,
-    PublicationUpdate
+    PublicationUpdate,
 } from "../../types";
-import {apiFetch} from "./client";
+
+import { apiFetch } from "./client";
 
 
 export async function geAllPublications(
@@ -16,6 +18,7 @@ export async function geAllPublications(
     );
 }
 
+
 export async function getMyPublications(
     accessToken: string,
 ): Promise<PublicationListResponse> {
@@ -26,6 +29,7 @@ export async function getMyPublications(
     );
 }
 
+
 export async function getMyPublication(
     accessToken: string,
     publicationId: number,
@@ -34,8 +38,9 @@ export async function getMyPublication(
         `/publications/publications/${publicationId}/`,
         undefined,
         accessToken,
-    )
+    );
 }
+
 
 export async function updatePublication(
     accessToken: string,
@@ -49,8 +54,9 @@ export async function updatePublication(
             body: JSON.stringify(newPublication),
         },
         accessToken,
-    )
+    );
 }
+
 
 export async function deletePublication(
     accessToken: string,
@@ -65,6 +71,7 @@ export async function deletePublication(
     );
 }
 
+
 export async function createPublication(
     newPublication: PublicationCreate,
     accessToken: string,
@@ -74,6 +81,34 @@ export async function createPublication(
         {
             method: "POST",
             body: JSON.stringify(newPublication),
+        },
+        accessToken,
+    );
+}
+
+
+export async function likePublication(
+    accessToken: string,
+    publicationId: number,
+): Promise<Publication> {
+    return apiFetch<Publication>(
+        `/publications/publications/${publicationId}/like/`,
+        {
+            method: "POST",
+        },
+        accessToken,
+    );
+}
+
+
+export async function unlikePublication(
+    accessToken: string,
+    publicationId: number,
+): Promise<Publication> {
+    return apiFetch<Publication>(
+        `/publications/publications/${publicationId}/like/`,
+        {
+            method: "DELETE",
         },
         accessToken,
     );
