@@ -1,3 +1,3 @@
-import {CreatePublicationScreen} from "@/src/screens/publication/CreatePublicationScreen";
+import {NewPublicationScreen} from "@/src/screens/publication/PublicationCreateScreen";
 
-export default CreatePublicationScreen;
+export default NewPublicationScreen;

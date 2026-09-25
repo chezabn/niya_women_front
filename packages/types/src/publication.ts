@@ -26,3 +26,8 @@ export interface PublicationUpdate {
     comments_enabled: boolean;
     is_archived: boolean;
 }
+
+export interface PublicationCreate {
+    caption: string;
+    comments_enabled: boolean;
+}

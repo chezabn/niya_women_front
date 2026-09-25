@@ -1,4 +1,8 @@
-import {Journal, JournalUpdate, Publication, PublicationListResponse, PublicationUpdate} from "../../types";
+import {
+    Publication, PublicationCreate,
+    PublicationListResponse,
+    PublicationUpdate
+} from "../../types";
 import {apiFetch} from "./client";
 
 export async function getMyPublications(
@@ -45,6 +49,20 @@ export async function deletePublication(
         `/publications/publications/${publicationId}/`,
         {
             method: "DELETE",
+        },
+        accessToken,
+    );
+}
+
+export async function createPublication(
+    newPublication: PublicationCreate,
+    accessToken: string,
+): Promise<Publication> {
+    return apiFetch<Publication>(
+        "/publications/publications/",
+        {
+            method: "POST",
+            body: JSON.stringify(newPublication),
         },
         accessToken,
     );
