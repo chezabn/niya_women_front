@@ -1,4 +1,7 @@
-import React, { useCallback, useState } from "react";
+import React, {
+    useCallback,
+    useState,
+} from "react";
 
 import {
     ActivityIndicator,
@@ -31,6 +34,8 @@ import {
 } from "@niyya/api";
 
 import { useAuthStore } from "@/src/store/authStore";
+
+import { CommentList } from "@/src/components/publication/CommentList";
 
 const getPublicationById = async (
     id: string,
@@ -123,15 +128,11 @@ export const PublicationDetailScreen = () => {
         ]),
     );
 
-    /*
-     * Une seule page de détail est utilisée
-     * pour les publications personnelles et
-     * les publications des autres utilisatrices.
-     */
     const isOwner =
         !!user &&
         !!publication &&
-        user.id === publication.author.id;
+        user.id ===
+        publication.author.id;
 
     const handleDelete = () => {
         if (
@@ -188,10 +189,53 @@ export const PublicationDetailScreen = () => {
 
         router.push(
             `/publications/${publication.id}/edit`,
-);
-};
+        );
+    };
 
-if (loading) {
+    if (loading) {
+        return (
+            <SafeAreaView
+                style={
+                    styles.container
+                }
+            >
+                <View
+                    style={
+                        styles.loading
+                    }
+                >
+                    <ActivityIndicator
+                        size="large"
+                        color={
+                            colors.primary
+                        }
+                    />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (!publication) {
+        return (
+            <SafeAreaView
+                style={
+                    styles.container
+                }
+            >
+                <View
+                    style={
+                        styles.loading
+                    }
+                >
+                    <Text>
+                        Publication
+                        introuvable.
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView
             style={
@@ -200,172 +244,137 @@ if (loading) {
         >
             <View
                 style={
-                    styles.loading
+                    styles.header
                 }
             >
-                <ActivityIndicator
-                    size="large"
-                    color={
-                        colors.primary
-                    }
-                />
-            </View>
-        </SafeAreaView>
-    );
-}
-
-if (!publication) {
-    return (
-        <SafeAreaView
-            style={
-                styles.container
-            }
-        >
-            <View
-                style={
-                    styles.loading
-                }
-            >
-                <Text>
-                    Publication
-                    introuvable.
-                </Text>
-            </View>
-        </SafeAreaView>
-    );
-}
-
-return (
-    <SafeAreaView
-        style={
-            styles.container
-        }
-    >
-        {/* Header */}
-        <View
-            style={
-                styles.header
-            }
-        >
-            <TouchableOpacity
-                style={
-                    styles.headerButton
-                }
-                onPress={() =>
-                    router.back()
-                }
-                activeOpacity={0.7}
-            >
-                <Ionicons
-                    name="arrow-back"
-                    size={26}
-                    color={
-                        colors.black
-                    }
-                />
-            </TouchableOpacity>
-
-            {isOwner && (
                 <TouchableOpacity
                     style={
                         styles.headerButton
                     }
-                    onPress={
-                        handleDelete
+                    onPress={() =>
+                        router.back()
                     }
                     activeOpacity={0.7}
                 >
                     <Ionicons
-                        name="trash-outline"
-                        size={24}
-                        color="#D9534F"
+                        name="arrow-back"
+                        size={26}
+                        color={
+                            colors.black
+                        }
                     />
                 </TouchableOpacity>
-            )}
-        </View>
 
-        {/* Content */}
-        <ScrollView
-            contentContainerStyle={
-                styles.content
-            }
-            showsVerticalScrollIndicator={
-                false
-            }
-        >
-            <Text
-                style={
-                    styles.username
+                {isOwner && (
+                    <TouchableOpacity
+                        style={
+                            styles.headerButton
+                        }
+                        onPress={
+                            handleDelete
+                        }
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="trash-outline"
+                            size={24}
+                            color="#D9534F"
+                        />
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            <ScrollView
+                contentContainerStyle={
+                    styles.content
                 }
+                showsVerticalScrollIndicator={
+                    false
+                }
+                keyboardShouldPersistTaps="handled"
             >
-                {
-                    publication
-                        .author
-                        .username
-                }
-            </Text>
-
-            {publication.caption ? (
                 <Text
                     style={
-                        styles.caption
+                        styles.username
                     }
                 >
                     {
-                        publication.caption
+                        publication.author
+                            .username
                     }
                 </Text>
-            ) : null}
 
-            {publication.is_edited && (
+                {publication.caption ? (
+                    <Text
+                        style={
+                            styles.caption
+                        }
+                    >
+                        {
+                            publication.caption
+                        }
+                    </Text>
+                ) : null}
+
+                {publication.is_edited && (
+                    <Text
+                        style={
+                            styles.edited
+                        }
+                    >
+                        Publication modifiée
+                    </Text>
+                )}
+
                 <Text
                     style={
-                        styles.edited
+                        styles.date
                     }
                 >
-                    Publication modifiée
+                    {formatDate(
+                        publication.created_at,
+                    )}
                 </Text>
-            )}
 
-            <Text
-                style={
-                    styles.date
-                }
-            >
-                {formatDate(
-                    publication.created_at,
-                )}
-            </Text>
-
-            <Text
-                style={
-                    styles.comments
-                }
-            >
-                {publication
-                    .comments_enabled
-                    ? "Commentaires activés"
-                    : "Commentaires désactivés"}
-            </Text>
-        </ScrollView>
-
-        {/* Owner action */}
-        {isOwner && (
-            <View
-                style={
-                    styles.bottom
-                }
-            >
-                <Button
-                    text="Modifier"
-                    onPress={
-                        handleEdit
+                <Text
+                    style={
+                        styles.commentsStatus
                     }
-                />
-            </View>
-        )}
-    </SafeAreaView>
-);
+                >
+                    {publication
+                        .comments_enabled
+                        ? "Commentaires activés"
+                        : "Commentaires désactivés"}
+                </Text>
+
+                {publication.comments_enabled && (
+                    <CommentList
+                        publicationId={
+                            publication.id
+                        }
+                        publicationAuthorId={
+                            publication.author.id
+                        }
+                    />
+                )}
+            </ScrollView>
+
+            {isOwner && (
+                <View
+                    style={
+                        styles.bottom
+                    }
+                >
+                    <Button
+                        text="Modifier"
+                        onPress={
+                            handleEdit
+                        }
+                    />
+                </View>
+            )}
+        </SafeAreaView>
+    );
 };
 
 const formatDate = (
@@ -383,86 +392,81 @@ const formatDate = (
     );
 };
 
-const styles =
-    StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor:
-            colors.white,
-        },
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor:
+        colors.white,
+    },
 
-        header: {
-            flexDirection:
-                "row",
-            justifyContent:
-                "space-between",
-            alignItems:
-                "center",
-            paddingHorizontal: 20,
-            paddingTop: 8,
-        },
+    header: {
+        flexDirection: "row",
+        justifyContent:
+            "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        paddingTop: 8,
+    },
 
-        headerButton: {
-            width: 44,
-            height: 44,
-            alignItems:
-                "center",
-            justifyContent:
-                "center",
-        },
+    headerButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent:
+            "center",
+    },
 
-        content: {
-            paddingHorizontal: 24,
-            paddingTop: 16,
-            paddingBottom: 32,
-        },
+    content: {
+        paddingHorizontal: 24,
+        paddingTop: 16,
+        paddingBottom: 32,
+    },
 
-        username: {
-            fontSize: 16,
-            fontWeight: "700",
-            color: colors.black,
-            marginBottom: 16,
-        },
+    username: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: colors.black,
+        marginBottom: 16,
+    },
 
-        caption: {
-            fontSize: 18,
-            lineHeight: 26,
-            color: colors.black,
-            marginBottom: 16,
-        },
+    caption: {
+        fontSize: 18,
+        lineHeight: 26,
+        color: colors.black,
+        marginBottom: 16,
+    },
 
-        edited: {
-            fontSize: 13,
-            fontWeight: "600",
-            color: colors.primary,
-            marginBottom: 8,
-        },
+    edited: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: colors.primary,
+        marginBottom: 8,
+    },
 
-        date: {
-            fontSize: 13,
-            color: "#888",
-            marginBottom: 8,
-        },
+    date: {
+        fontSize: 13,
+        color: "#888",
+        marginBottom: 8,
+    },
 
-        comments: {
-            fontSize: 13,
-            color: "#888",
-        },
+    commentsStatus: {
+        fontSize: 13,
+        color: "#888",
+    },
 
-        bottom: {
-            paddingHorizontal: 24,
-            paddingVertical: 16,
-            borderTopWidth: 1,
-            borderTopColor: "#ECECEC",
-            backgroundColor:
-            colors.white,
-        },
+    bottom: {
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#ECECEC",
+        backgroundColor:
+        colors.white,
+    },
 
-        loading: {
-            flex: 1,
-            alignItems:
-                "center",
-            justifyContent:
-                "center",
-        },
-    });
+    loading: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent:
+            "center",
+    },
+});
