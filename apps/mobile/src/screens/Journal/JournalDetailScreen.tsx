@@ -148,8 +148,8 @@ export const JournalDetailScreen = () => {
 
         router.push(
             `/journal/${journal.id}/edit`,
-);
-};
+        );
+    };
 
 
 if (loading) {
