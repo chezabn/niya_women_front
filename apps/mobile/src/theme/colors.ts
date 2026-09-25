@@ -8,6 +8,9 @@ export const colors = {
     textSecondary: "#777777",
     textMuted: "#999999",
 
+    gray: "#777777",
+    lightGray: "#E0E0E0",
+
     border: "#E0E0E0",
     background: "#FAFAFA",
 };

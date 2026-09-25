@@ -4,8 +4,6 @@ import {
     JournalCreate,
     JournalListResponse,
     JournalUpdate,
-    type PublicationCreate,
-    type PublicationDetail
 } from "../../types";
 
 export async function getMyJournals(

@@ -1,17 +1,22 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-    ScrollView,
-    StyleSheet,
-    RefreshControl,
-} from "react-native";
-
 import {
     useCallback,
-    useEffect,
     useState,
 } from "react";
 
-import { router } from "expo-router";
+import {
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+} from "react-native";
+
+import {
+    SafeAreaView,
+} from "react-native-safe-area-context";
+
+import {
+    router,
+    useFocusEffect,
+} from "expo-router";
 
 import {
     getMe,
@@ -24,14 +29,34 @@ import {
 
 import { colors } from "@/src/theme";
 
-import { useAuthStore } from "@/src/store/authStore";
+import {
+    useAuthStore,
+} from "@/src/store/authStore";
 
-import { ProfileHeader } from "@/src/components/profile/ProfileHeader";
-import { ProfileStats } from "@/src/components/profile/ProfileStats";
-import { ProfileBio } from "@/src/components/profile/ProfileBio";
-import { ProfileActionButtons } from "@/src/components/profile/ProfileActionButtons";
-import { ProfileTabs } from "@/src/components/profile/ProfileTabs";
-import { PostGrid } from "@/src/components/profile/ProfileGrid";
+import {
+    ProfileHeader,
+} from "@/src/components/profile/ProfileHeader";
+
+import {
+    ProfileStats,
+} from "@/src/components/profile/ProfileStats";
+
+import {
+    ProfileBio,
+} from "@/src/components/profile/ProfileBio";
+
+import {
+    ProfileActionButtons,
+} from "@/src/components/profile/ProfileActionButtons";
+
+import {
+    ProfileTabs,
+} from "@/src/components/profile/ProfileTabs";
+
+import {
+    PostGrid,
+} from "@/src/components/profile/ProfileGrid";
+
 
 export const ProfileScreen = () => {
     const user = useAuthStore(
@@ -46,100 +71,158 @@ export const ProfileScreen = () => {
         (state) => state.setUser,
     );
 
-    const [activeTab, setActiveTab] = useState<
+    const [
+        activeTab,
+        setActiveTab,
+    ] = useState<
         "posts" | "saved"
     >("posts");
 
-    const [refreshing, setRefreshing] =
-        useState(false);
+    const [
+        refreshing,
+        setRefreshing,
+    ] = useState(false);
 
-    const [posts, setPosts] = useState<
-        Publication[]
-    >([]);
+    const [
+        posts,
+        setPosts,
+    ] = useState<Publication[]>([]);
+
 
     const handleEditProfile = () => {
-        router.push("/profile/edit");
+        router.push(
+            "/profile/edit",
+        );
     };
+
 
     const handleJournal = () => {
-        router.push("/journal");
+        router.push(
+            "/journal",
+        );
     };
+
 
     const handleSettings = () => {
-        router.push("/profile/settings");
+        router.push(
+            "/profile/settings",
+        );
     };
 
-    const refreshUser = useCallback(async () => {
-        if (!accessToken) {
-            return;
-        }
 
-        try {
-            const freshUser =
-                await getMe(accessToken);
+    const refreshUser = useCallback(
+        async () => {
+            if (!accessToken) {
+                return;
+            }
 
-            setUser(freshUser);
-        } catch (error) {
-            console.error(error);
-        }
-    }, [
-        accessToken,
-        setUser,
-    ]);
+            try {
+                const freshUser =
+                    await getMe(
+                        accessToken,
+                    );
 
-    const refreshPosts = useCallback(async () => {
-        if (!accessToken) {
-            return;
-        }
+                setUser(
+                    freshUser,
+                );
+            } catch (error) {
+                console.error(
+                    "Erreur lors du chargement du profil :",
+                    error,
+                );
+            }
+        },
+        [
+            accessToken,
+            setUser,
+        ],
+    );
 
-        try {
-            const publications =
-                await getMyPublications(
-                    accessToken,
+
+    const refreshPosts = useCallback(
+        async () => {
+            if (!accessToken) {
+                return;
+            }
+
+            try {
+                const response =
+                    await getMyPublications(
+                        accessToken,
+                    );
+
+                setPosts(
+                    response.results,
+                );
+            } catch (error) {
+                console.error(
+                    "Erreur lors du chargement des publications :",
+                    error,
+                );
+            }
+        },
+        [
+            accessToken,
+        ],
+    );
+
+
+    const loadProfileData =
+        useCallback(
+            async () => {
+                await Promise.all([
+                    refreshUser(),
+                    refreshPosts(),
+                ]);
+            },
+            [
+                refreshUser,
+                refreshPosts,
+            ],
+        );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            loadProfileData();
+        }, [
+            loadProfileData,
+        ]),
+    );
+
+
+    const onRefresh =
+        useCallback(
+            async () => {
+                setRefreshing(
+                    true,
                 );
 
-            console.log(
-                JSON.stringify(
-                    publications,
-                    null,
-                    2,
-                )
-            );
+                try {
+                    await loadProfileData();
+                } finally {
+                    setRefreshing(
+                        false,
+                    );
+                }
+            },
+            [
+                loadProfileData,
+            ],
+        );
 
-            setPosts(publications);
-        } catch (error) {
-            console.error(error);
-        }
-    }, [accessToken]);
-
-    const loadProfileData = useCallback(async () => {
-        await Promise.all([
-            refreshUser(),
-            refreshPosts(),
-        ]);
-    }, [
-        refreshUser,
-        refreshPosts,
-    ]);
-
-    useEffect(() => {
-        loadProfileData();
-    }, [loadProfileData]);
-
-    const onRefresh = useCallback(async () => {
-        setRefreshing(true);
-
-        await loadProfileData();
-
-        setRefreshing(false);
-    }, [loadProfileData]);
 
     if (!user) {
         return null;
     }
 
+
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+            style={
+                styles.container
+            }
+        >
             <ScrollView
                 contentContainerStyle={
                     styles.content
@@ -209,10 +292,13 @@ export const ProfileScreen = () => {
                     }
                 />
 
-                {activeTab === "posts" &&
+                {activeTab ===
+                    "posts" &&
                     posts.length > 0 && (
                         <PostGrid
-                            posts={posts}
+                            posts={
+                                posts
+                            }
                         />
                     )}
             </ScrollView>
@@ -220,17 +306,19 @@ export const ProfileScreen = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor:
-        colors.white,
-    },
 
-    content: {
-        flexGrow: 1,
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 32,
-    },
-});
+const styles =
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor:
+                colors.white,
+        },
+
+        content: {
+            flexGrow: 1,
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 32,
+        },
+    });

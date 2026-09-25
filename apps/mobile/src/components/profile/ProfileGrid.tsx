@@ -1,59 +1,188 @@
 import React from "react";
+
 import {
     FlatList,
-    Image,
     StyleSheet,
-    Dimensions,
+    Text,
+    View,
 } from "react-native";
 
 import {
     Publication,
 } from "@niyya/types";
 
-const SIZE =
-    Dimensions.get("window").width / 3;
+import { colors } from "@/src/theme";
+
 
 interface Props {
     posts: Publication[];
 }
 
+
 export const PostGrid = ({
-                             posts,
-                         }: Props) => {
+    posts,
+}: Props) => {
     return (
         <FlatList
             data={posts}
-            numColumns={3}
             scrollEnabled={false}
             keyExtractor={(item) =>
                 item.id.toString()
             }
-            renderItem={({ item }) => {
-                const cover =
-                    item.medias?.[0];
-
-                if (!cover) {
-                    return null;
-                }
-
-                return (
-                    <Image
-                        source={{
-                            uri: cover.file,
-                        }}
+            contentContainerStyle={
+                styles.container
+            }
+            renderItem={({ item }) => (
+                <View
+                    style={
+                        styles.post
+                    }
+                >
+                    <View
                         style={
-                            styles.image
+                            styles.header
                         }
-                    />
-                );
-            }}
+                    >
+                        <Text
+                            style={
+                                styles.author
+                            }
+                        >
+                            {item.author.username}
+                        </Text>
+
+                        {item.is_edited && (
+                            <Text
+                                style={
+                                    styles.edited
+                                }
+                            >
+                                Modifiée
+                            </Text>
+                        )}
+                    </View>
+
+                    {item.caption ? (
+                        <Text
+                            style={
+                                styles.caption
+                            }
+                        >
+                            {item.caption}
+                        </Text>
+                    ) : null}
+
+                    <View
+                        style={
+                            styles.footer
+                        }
+                    >
+                        <Text
+                            style={
+                                styles.date
+                            }
+                        >
+                            {formatDate(
+                                item.created_at,
+                            )}
+                        </Text>
+
+                        {item.comments_enabled && (
+                            <Text
+                                style={
+                                    styles.comments
+                                }
+                            >
+                                Commentaires activés
+                            </Text>
+                        )}
+                    </View>
+                </View>
+            )}
         />
     );
 };
 
-const styles = StyleSheet.create({
-    image: {
-        width: SIZE,
-        height: SIZE,
-    },
-});
+
+const formatDate = (
+    date: string,
+) => {
+    return new Date(
+        date,
+    ).toLocaleDateString(
+        "fr-FR",
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        },
+    );
+};
+
+
+const styles =
+    StyleSheet.create({
+        container: {
+            paddingTop: 16,
+            paddingBottom: 16,
+        },
+
+        post: {
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+            marginBottom: 12,
+            backgroundColor:
+                colors.white,
+            borderWidth: 1,
+            borderColor: "#EEE",
+            borderRadius: 12,
+        },
+
+        header: {
+            flexDirection:
+                "row",
+            alignItems:
+                "center",
+            justifyContent:
+                "space-between",
+            marginBottom: 10,
+        },
+
+        author: {
+            fontSize: 15,
+            fontWeight: "700",
+            color: colors.black,
+        },
+
+        edited: {
+            fontSize: 12,
+            color: colors.primary,
+            fontWeight: "600",
+        },
+
+        caption: {
+            fontSize: 15,
+            lineHeight: 22,
+            color: colors.black,
+            marginBottom: 12,
+        },
+
+        footer: {
+            flexDirection:
+                "row",
+            alignItems:
+                "center",
+            justifyContent:
+                "space-between",
+        },
+
+        date: {
+            fontSize: 12,
+            color: "#888",
+        },
+
+        comments: {
+            fontSize: 12,
+            color: "#888",
+        },
+    });
