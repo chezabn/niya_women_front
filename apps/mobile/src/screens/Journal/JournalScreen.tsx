@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
     FlatList,
@@ -16,26 +16,41 @@ import { JournalEntryCard } from "@/src/components/journal/JournalEntryCard";
 import { JournalEmptyState } from "@/src/components/journal/JournalEmptyState";
 import { NewJournalButton } from "@/src/components/journal/NewJournalButton";
 
-const entries = [
-    {
-        id: 1,
-        title: "Une belle journée",
-        content:
-            "Aujourd'hui je me suis sentie beaucoup plus sereine. J'ai pris du temps pour moi et cela m'a fait énormément de bien.",
-        date: "24 juin 2026",
-        mood: "😊",
-    },
-    {
-        id: 2,
-        title: "Fatigue",
-        content:
-            "Une journée un peu difficile mais je garde confiance pour demain.",
-        date: "22 juin 2026",
-        mood: "😔",
-    },
-];
+import { getMyJournals } from "@niyya/api";
+import { Journal } from "@niyya/types"
+import { useAuthStore } from "@/src/store/authStore";
 
 export const JournalScreen = () => {
+    const accessToken = useAuthStore(
+        (state) => state.accessToken
+    );
+
+    const [entries, setEntries] = useState<Journal[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const loadJournals = useCallback(async () => {
+        if (!accessToken) return;
+
+        try {
+            setLoading(true);
+
+            const journals = await getMyJournals(accessToken);
+
+            setEntries(journals);
+        } catch (error) {
+            console.error(
+                "Erreur lors du chargement des journaux :",
+                error
+            );
+        } finally {
+            setLoading(false);
+        }
+    }, [accessToken]);
+
+    useEffect(() => {
+        loadJournals();
+    }, [loadJournals]);
+
     return (
         <SafeAreaView style={styles.container}>
             <FlatList
@@ -46,9 +61,8 @@ export const JournalScreen = () => {
                 renderItem={({ item }) => (
                     <JournalEntryCard
                         title={item.title}
-                        content={item.content}
+                        content={item.page}
                         date={item.date}
-                        mood={item.mood}
                         onPress={() =>
                             router.push(
                                 `/journal/${item.id}`
@@ -60,7 +74,9 @@ export const JournalScreen = () => {
                     <JournalHeader />
                 }
                 ListEmptyComponent={
-                    <JournalEmptyState />
+                    !loading ? (
+                        <JournalEmptyState />
+                    ) : null
                 }
                 contentContainerStyle={
                     styles.content
