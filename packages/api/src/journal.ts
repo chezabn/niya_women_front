@@ -32,7 +32,7 @@ export async function updatePage(
         `/journal/journals/${pageId}/`,
         {
             method: "PATCH",
-            body: JSON.stringify(newPage)
+            body: JSON.stringify(newPage),
         },
         accessToken,
     )

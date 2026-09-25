@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import {
     ActivityIndicator,
@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
     router,
+    useFocusEffect,
     useLocalSearchParams,
 } from "expo-router";
 
@@ -69,34 +70,36 @@ export const JournalDetailScreen = () => {
         useState(true);
 
 
-    useEffect(() => {
-        const loadJournal = async () => {
-            if (!id || !accessToken) {
-                setLoading(false);
-                return;
-            }
+    useFocusEffect(
+        useCallback(() => {
+            const loadJournal = async () => {
+                if (!id || !accessToken) {
+                    setLoading(false);
+                    return;
+                }
 
-            try {
-                setLoading(true);
+                try {
+                    setLoading(true);
 
-                const data = await getJournalById(
-                    id,
-                    accessToken,
-                );
+                    const data = await getJournalById(
+                        id,
+                        accessToken,
+                    );
 
-                setJournal(data);
-            } catch (error) {
-                console.error(
-                    "Erreur lors du chargement du journal :",
-                    error,
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
+                    setJournal(data);
+                } catch (error) {
+                    console.error(
+                        "Erreur lors du chargement du journal :",
+                        error,
+                    );
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-        loadJournal();
-    }, [id, accessToken]);
+            loadJournal();
+        }, [id, accessToken]),
+    );
 
 
     const handleDelete = () => {

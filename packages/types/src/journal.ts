@@ -17,5 +17,4 @@ export interface JournalListResponse {
 export interface JournalUpdate {
     title: string;
     page: string;
-    date: string;
 }
