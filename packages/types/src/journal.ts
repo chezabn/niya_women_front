@@ -13,3 +13,9 @@ export interface JournalListResponse {
     previous: string | null;
     results: Journal[];
 }
+
+export interface JournalUpdate {
+    title: string;
+    page: string;
+    date: string;
+}

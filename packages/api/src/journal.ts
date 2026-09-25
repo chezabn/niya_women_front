@@ -1,5 +1,5 @@
 import {apiFetch} from "./client";
-import {Journal, JournalListResponse} from "../../types";
+import {Journal, JournalListResponse, JournalUpdate} from "../../types";
 
 export async function getMyJournals(
     accessToken: string,
@@ -21,4 +21,32 @@ export async function getPage(
         undefined,
         accessToken,
     )
+}
+
+export async function updatePage(
+    accessToken: string,
+    pageId: number,
+    newPage: JournalUpdate,
+): Promise<Journal> {
+    return apiFetch<Journal>(
+        `/journal/journals/${pageId}/`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(newPage)
+        },
+        accessToken,
+    )
+}
+
+export async function deletePage(
+    accessToken: string,
+    pageId: number,
+): Promise<void> {
+    await apiFetch(
+        `/journal/journals/${pageId}/`,
+        {
+            method: "DELETE",
+        },
+        accessToken,
+    );
 }

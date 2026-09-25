@@ -1,12 +1,10 @@
-import {API_BASE_URL} from "../../constants";
-
+import { API_BASE_URL } from "../../constants";
 
 export async function apiFetch<T>(
     endpoint: string,
     options?: RequestInit,
     accessToken?: string,
 ): Promise<T> {
-
     const headers: Record<string, string> = {};
 
     if (!(options?.body instanceof FormData)) {
@@ -22,8 +20,12 @@ export async function apiFetch<T>(
         {
             ...options,
             headers,
-        }
+        },
     );
+
+    if (response.status === 204) {
+        return undefined as T;
+    }
 
     const data = await response.json();
 

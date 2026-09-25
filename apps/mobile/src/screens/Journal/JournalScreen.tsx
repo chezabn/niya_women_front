@@ -7,7 +7,10 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { router } from "expo-router";
+import {
+    router,
+    useFocusEffect,
+} from "expo-router";
 
 import { colors } from "@/src/theme";
 
@@ -47,9 +50,11 @@ export const JournalScreen = () => {
         }
     }, [accessToken]);
 
-    useEffect(() => {
-        loadJournals();
-    }, [loadJournals]);
+    useFocusEffect(
+        useCallback(() => {
+            loadJournals();
+        }, [loadJournals]),
+    );
 
     return (
         <SafeAreaView style={styles.container}>

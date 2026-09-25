@@ -23,24 +23,35 @@ import { colors } from "@/src/theme";
 import { Button } from "@/src/components/ui/Button";
 
 import { Journal } from "@niyya/types";
-import { getPage } from "@niyya/api";
+import {
+    getPage,
+    deletePage,
+} from "@niyya/api";
 
 import { useAuthStore } from "@/src/store/authStore";
 
-/**
- * Récupère une page de journal depuis l'API Django.
- */
+
 const getJournalById = async (
     id: string,
     accessToken: string,
 ): Promise<Journal> => {
-    console.log("Chargement du journal :", id);
-
     return getPage(
         accessToken,
         Number(id),
     );
 };
+
+
+const deleteJournalById = async (
+    id: number,
+    accessToken: string,
+): Promise<void> => {
+    await deletePage(
+        accessToken,
+        id,
+    );
+};
+
 
 export const JournalDetailScreen = () => {
     const { id } = useLocalSearchParams<{
@@ -56,6 +67,7 @@ export const JournalDetailScreen = () => {
 
     const [loading, setLoading] =
         useState(true);
+
 
     useEffect(() => {
         const loadJournal = async () => {
@@ -86,8 +98,11 @@ export const JournalDetailScreen = () => {
         loadJournal();
     }, [id, accessToken]);
 
+
     const handleDelete = () => {
-        if (!journal) return;
+        if (!journal || !accessToken) {
+            return;
+        }
 
         Alert.alert(
             "Supprimer la page",
@@ -100,24 +115,42 @@ export const JournalDetailScreen = () => {
                 {
                     text: "Supprimer",
                     style: "destructive",
-                    onPress: () => {
-                        console.log(
-                            "Suppression du journal :",
-                            journal.id,
-                        );
+                    onPress: async () => {
+                        try {
+                            await deleteJournalById(
+                                journal.id,
+                                accessToken,
+                            );
+
+                            router.back();
+                        } catch (error) {
+                            console.error(
+                                "Erreur lors de la suppression du journal :",
+                                error,
+                            );
+
+                            Alert.alert(
+                                "Erreur",
+                                "Impossible de supprimer cette page de journal.",
+                            );
+                        }
                     },
                 },
             ],
         );
     };
 
+
     const handleEdit = () => {
-        if (!journal) return;
+        if (!journal) {
+            return;
+        }
 
         router.push(
             `/journal/${journal.id}/edit`,
 );
 };
+
 
 if (loading) {
     return (
@@ -134,6 +167,7 @@ if (loading) {
     );
 }
 
+
 if (!journal) {
     return (
         <SafeAreaView
@@ -148,10 +182,13 @@ if (!journal) {
     );
 }
 
+
 return (
     <SafeAreaView style={styles.container}>
+
         {/* Header */}
         <View style={styles.header}>
+
             <TouchableOpacity
                 style={styles.headerButton}
                 onPress={() => router.back()}
@@ -164,6 +201,7 @@ return (
                 />
             </TouchableOpacity>
 
+
             <TouchableOpacity
                 style={styles.headerButton}
                 onPress={handleDelete}
@@ -175,7 +213,9 @@ return (
                     color="#D9534F"
                 />
             </TouchableOpacity>
+
         </View>
+
 
         {/* Content */}
         <ScrollView
@@ -186,16 +226,21 @@ return (
                 {journal.date}
             </Text>
 
+
             <Text style={styles.title}>
                 {journal.title}
             </Text>
 
+
             <View style={styles.separator} />
+
 
             <Text style={styles.body}>
                 {journal.page}
             </Text>
+
         </ScrollView>
+
 
         {/* Bottom action */}
         <View style={styles.bottom}>
@@ -204,9 +249,11 @@ return (
                 onPress={handleEdit}
             />
         </View>
+
     </SafeAreaView>
 );
 };
+
 
 const styles = StyleSheet.create({
     container: {
