@@ -52,3 +52,16 @@ export const searchUser = (
         accessToken,
     )
 }
+
+export const getUser = (
+    userId: number,
+    accessToken: string,
+) => {
+    return apiFetch<User>(
+        `/users/${userId}/`,
+        {
+            method: "GET",
+        },
+        accessToken,
+    )
+}

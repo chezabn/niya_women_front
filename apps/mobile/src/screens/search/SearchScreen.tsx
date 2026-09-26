@@ -118,8 +118,7 @@ export default function SearchScreen() {
     const handleUserPress =
         (user: UserSearchResult) => {
             router.push(
-                "/profile", // TODO Change
-                // `/profile/${user.id}`,
+                `/profile/${user.id}`,
             );
         };
 

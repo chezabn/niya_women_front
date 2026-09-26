@@ -28,6 +28,18 @@ export async function geAllPublicationsLiked(
     );
 }
 
+export async function getUserPublications(
+    userId: number,
+    accessToken: string,
+): Promise<PublicationListResponse> {
+    return apiFetch<PublicationListResponse>(
+        `/publications/publications/user/${userId}/`,
+        undefined,
+        accessToken,
+    );
+}
+
+
 export async function getMyPublications(
     accessToken: string,
 ): Promise<PublicationListResponse> {
