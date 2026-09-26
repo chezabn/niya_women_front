@@ -14,7 +14,7 @@ export const ForgotPasswordScreen = () => {
 
     const handleRequestReset = async () => {
         try {
-            const response = await forgotPassword({
+            await forgotPassword({
                 email: email,
             });
 

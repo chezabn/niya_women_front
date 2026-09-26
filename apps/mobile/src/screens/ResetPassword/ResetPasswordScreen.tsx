@@ -17,7 +17,7 @@ export const ResetPasswordScreen = () => {
 
     const handleResetPassword = async () => {
         try {
-            const response = await resetPassword({
+            await resetPassword({
                 email: email,
                 code: code,
                 new_password: newPassword,
