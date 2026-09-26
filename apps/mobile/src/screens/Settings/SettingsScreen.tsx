@@ -142,6 +142,14 @@ export const SettingsScreen = () => {
                             )
                         }
                     />
+                    <SettingsItem
+                        title="Mon activité"
+                        onPress={() =>
+                            router.push(
+                                "/publications/liked",
+                            )
+                        }
+                    />
                 </View>
 
                 <View style={styles.section}>

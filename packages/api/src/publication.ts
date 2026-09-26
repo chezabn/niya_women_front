@@ -18,6 +18,15 @@ export async function geAllPublications(
     );
 }
 
+export async function geAllPublicationsLiked(
+    accessToken: string,
+): Promise<PublicationListResponse> {
+    return apiFetch<PublicationListResponse>(
+        "/publications/publications/liked/",
+        undefined,
+        accessToken,
+    );
+}
 
 export async function getMyPublications(
     accessToken: string,

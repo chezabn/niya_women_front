@@ -1,184 +1,20 @@
-import React, {
-    useCallback,
-    useState,
-} from "react";
+import React, {useCallback, useState,} from "react";
 
-import {
-    ActivityIndicator,
-    FlatList,
-    Pressable,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import {ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View,} from "react-native";
+import {PublicationCard} from "@/src/components/publication/PublicationCard";
+import {SafeAreaView} from "react-native-safe-area-context";
 
-import { SafeAreaView } from "react-native-safe-area-context";
+import {router} from "expo-router";
 
-import { router } from "expo-router";
+import {Ionicons} from "@expo/vector-icons";
 
-import { Ionicons } from "@expo/vector-icons";
+import {colors} from "@/src/theme";
 
-import { colors } from "@/src/theme";
+import {geAllPublications, likePublication, unlikePublication,} from "@niyya/api";
 
-import {
-    geAllPublications, likePublication, unlikePublication,
-} from "@niyya/api";
+import {Publication,} from "@niyya/types";
 
-import {
-    Publication,
-} from "@niyya/types";
-
-import {
-    useAuthStore,
-} from "@/src/store/authStore";
-
-
-/*
- * Formatage de la date
- */
-const formatDate = (
-    date: string,
-): string => {
-    return new Date(date).toLocaleDateString(
-        "fr-FR",
-        {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        },
-    );
-};
-
-
-/*
- * Carte publication
- */
-interface PublicationCardProps {
-    publication: Publication;
-    onPress: () => void;
-    onLike: () => void;
-}
-
-
-
-const PublicationCard = ({
-     publication,
-     onPress,
-     onLike,
- }: PublicationCardProps) => {
-
-    return (
-        <Pressable
-            onPress={onPress}
-            style={({ pressed }) => [
-                styles.card,
-                pressed && styles.cardPressed,
-            ]}
-        >
-            {/* Auteur */}
-            <View style={styles.cardHeader}>
-                <View style={styles.authorContainer}>
-                    <View style={styles.authorCircle}>
-                        <Text
-                            style={
-                                styles.authorInitial
-                            }
-                        >
-                            {publication.author.username
-                                ?.charAt(0)
-                                .toUpperCase()}
-                        </Text>
-                    </View>
-
-                    <View>
-                        <Text
-                            style={
-                                styles.username
-                            }
-                        >
-                            {publication.author.username}
-                        </Text>
-
-                        <Text
-                            style={
-                                styles.date
-                            }
-                        >
-                            {formatDate(
-                                publication.created_at,
-                            )}
-                        </Text>
-                    </View>
-                </View>
-
-                <Ionicons
-                    name="ellipsis-horizontal"
-                    size={20}
-                    color="#999"
-                />
-            </View>
-
-
-            {/* Contenu */}
-            {publication.caption ? (
-                <Text style={styles.caption}>
-                    {publication.caption}
-                </Text>
-            ) : null}
-
-
-            {/* Footer */}
-            <View style={styles.cardFooter}>
-                <View style={styles.interactionContainer}>
-                    <Pressable
-                        style={styles.likeContainer}
-                        onPress={onLike}
-                        hitSlop={8}
-                    >
-                        <Ionicons
-                            name={
-                                publication.is_liked
-                                    ? "heart"
-                                    : "heart-outline"
-                            }
-                            size={19}
-                            color={
-                                publication.is_liked
-                                    ? "#E88A9A"
-                                    : "#888"
-                            }
-                        />
-
-                        <Text style={styles.likeText}>
-                            {publication.like_count}
-                        </Text>
-                    </Pressable>
-
-                    <View style={styles.commentContainer}>
-                        <Ionicons
-                            name="chatbubble-outline"
-                            size={17}
-                            color="#888"
-                        />
-
-                        <Text style={styles.commentText}>
-                            {publication.comments_enabled
-                                ? "Commentaires"
-                                : "Commentaires désactivés"}
-                        </Text>
-                    </View>
-                </View>
-
-                <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color="#AAA"
-                />
-            </View>
-        </Pressable>
-    );
-};
+import {useAuthStore,} from "@/src/store/authStore";
 
 
 /*
