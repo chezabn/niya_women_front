@@ -29,6 +29,7 @@ import { colors } from "@/src/theme";
 import { Button } from "@/src/components/ui/Button";
 
 import { Journal } from "@niyya/types";
+
 import {
     getPage,
     updatePage,
@@ -71,16 +72,16 @@ export const JournalEditScreen = () => {
 
         if (!title.trim()) {
             Alert.alert(
-                "Titre requis",
-                "Veuillez renseigner un titre.",
+                "Un petit titre",
+                "Donnez un titre à cette page de votre journal.",
             );
             return;
         }
 
         if (!page.trim()) {
             Alert.alert(
-                "Contenu requis",
-                "Veuillez renseigner le contenu de votre journal.",
+                "Prenez un moment pour vous",
+                "Écrivez quelques mots avant d'enregistrer votre page.",
             );
             return;
         }
@@ -105,17 +106,19 @@ export const JournalEditScreen = () => {
             );
 
             Alert.alert(
-                "Erreur",
-                "Impossible de modifier cette page de journal.",
+                "Une erreur est survenue",
+                "Impossible d'enregistrer les modifications de cette page.",
             );
         } finally {
             setSaving(false);
         }
     };
 
+
     /*
      * Chargement du journal
      */
+
     useEffect(() => {
         const loadJournal = async () => {
             if (!id || !accessToken) {
@@ -142,7 +145,7 @@ export const JournalEditScreen = () => {
                 );
 
                 Alert.alert(
-                    "Erreur",
+                    "Une erreur est survenue",
                     "Impossible de charger cette page de journal.",
                     [
                         {
@@ -161,21 +164,43 @@ export const JournalEditScreen = () => {
     }, [id, accessToken]);
 
 
-
-
     /*
      * Chargement
      */
+
     if (loading) {
         return (
             <SafeAreaView
                 style={styles.container}
             >
                 <View style={styles.loading}>
+                    <View
+                        style={
+                            styles.loadingIcon
+                        }
+                    >
+                        <Ionicons
+                            name="book-outline"
+                            size={24}
+                            color={colors.primary}
+                        />
+                    </View>
+
                     <ActivityIndicator
-                        size="large"
+                        size="small"
                         color={colors.primary}
+                        style={
+                            styles.loadingIndicator
+                        }
                     />
+
+                    <Text
+                        style={
+                            styles.loadingText
+                        }
+                    >
+                        Ouverture de votre page...
+                    </Text>
                 </View>
             </SafeAreaView>
         );
@@ -185,15 +210,63 @@ export const JournalEditScreen = () => {
     /*
      * Journal introuvable
      */
+
     if (!journal) {
         return (
             <SafeAreaView
                 style={styles.container}
             >
-                <View style={styles.loading}>
-                    <Text>
-                        Page de journal introuvable.
+                <View
+                    style={
+                        styles.errorContainer
+                    }
+                >
+                    <View
+                        style={
+                            styles.errorIcon
+                        }
+                    >
+                        <Ionicons
+                            name="book-outline"
+                            size={27}
+                            color={colors.primary}
+                        />
+                    </View>
+
+                    <Text
+                        style={
+                            styles.errorTitle
+                        }
+                    >
+                        Page introuvable
                     </Text>
+
+                    <Text
+                        style={
+                            styles.errorText
+                        }
+                    >
+                        Cette page de votre journal
+                        n'est plus disponible.
+                    </Text>
+
+                    <TouchableOpacity
+                        style={
+                            styles.errorButton
+                        }
+                        onPress={() =>
+                            router.back()
+                        }
+                        activeOpacity={0.8}
+                    >
+                        <Text
+                            style={
+                                styles.errorButtonText
+                            }
+                        >
+                            Retour
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </SafeAreaView>
         );
@@ -212,7 +285,9 @@ export const JournalEditScreen = () => {
                         : undefined
                 }
             >
+
                 {/* Header */}
+
                 <View style={styles.header}>
                     <TouchableOpacity
                         style={
@@ -222,19 +297,34 @@ export const JournalEditScreen = () => {
                             router.back()
                         }
                         activeOpacity={0.7}
+                        hitSlop={8}
                     >
                         <Ionicons
                             name="arrow-back"
-                            size={26}
+                            size={24}
                             color={colors.black}
                         />
                     </TouchableOpacity>
 
-                    <Text
-                        style={styles.headerTitle}
+                    <View
+                        style={
+                            styles.headerCenter
+                        }
                     >
-                        Modifier
-                    </Text>
+                        <Ionicons
+                            name="create-outline"
+                            size={18}
+                            color={colors.primary}
+                        />
+
+                        <Text
+                            style={
+                                styles.headerLabel
+                            }
+                        >
+                            Modifier ma page
+                        </Text>
+                    </View>
 
                     <View
                         style={
@@ -244,7 +334,8 @@ export const JournalEditScreen = () => {
                 </View>
 
 
-                {/* Formulaire */}
+                {/* Contenu */}
+
                 <ScrollView
                     style={styles.scroll}
                     contentContainerStyle={
@@ -255,64 +346,264 @@ export const JournalEditScreen = () => {
                         false
                     }
                 >
+
+                    {/* Introduction */}
+
+                    <View
+                        style={
+                            styles.introCard
+                        }
+                    >
+                        <View
+                            style={
+                                styles.introIcon
+                            }
+                        >
+                            <Ionicons
+                                name="heart-outline"
+                                size={19}
+                                color={colors.primary}
+                            />
+                        </View>
+
+                        <View
+                            style={
+                                styles.introContent
+                            }
+                        >
+                            <Text
+                                style={
+                                    styles.introTitle
+                                }
+                            >
+                                Prenez le temps de vous relire
+                            </Text>
+
+                            <Text
+                                style={
+                                    styles.introText
+                                }
+                            >
+                                Vous pouvez modifier cette page
+                                comme vous le souhaitez. Vos mots
+                                restent les vôtres.
+                            </Text>
+                        </View>
+                    </View>
+
+
                     {/* Titre */}
-                    <View
-                        style={styles.field}
-                    >
-                        <Text
-                            style={styles.label}
-                        >
-                            Titre
-                        </Text>
 
-                        <TextInput
-                            style={styles.titleInput}
-                            value={title}
-                            onChangeText={
-                                setTitle
+                    <View
+                        style={
+                            styles.titleSection
+                        }
+                    >
+                        <View
+                            style={
+                                styles.sectionHeader
                             }
-                            placeholder="Titre de votre journal"
-                            placeholderTextColor="#999"
-                            multiline
-                        />
+                        >
+                            <View>
+                                <Text
+                                    style={
+                                        styles.label
+                                    }
+                                >
+                                    Le titre de votre page
+                                </Text>
+
+                                <Text
+                                    style={
+                                        styles.hint
+                                    }
+                                >
+                                    Donnez un nom à ce moment.
+                                </Text>
+                            </View>
+
+                            <Ionicons
+                                name="text-outline"
+                                size={21}
+                                color={colors.primary}
+                            />
+                        </View>
+
+                        <View
+                            style={
+                                styles.titleCard
+                            }
+                        >
+                            <TextInput
+                                style={
+                                    styles.titleInput
+                                }
+                                value={title}
+                                onChangeText={
+                                    setTitle
+                                }
+                                placeholder="Comment appeler ce moment ?"
+                                placeholderTextColor={
+                                    colors.textMuted
+                                }
+                                maxLength={100}
+                            />
+
+                            <Text
+                                style={
+                                    styles.counter
+                                }
+                            >
+                                {title.length}/100
+                            </Text>
+                        </View>
                     </View>
 
 
-                    {/* Contenu */}
-                    <View
-                        style={styles.field}
-                    >
-                        <Text
-                            style={styles.label}
-                        >
-                            Journal
-                        </Text>
+                    {/* Journal */}
 
-                        <TextInput
-                            style={styles.pageInput}
-                            value={page}
-                            onChangeText={
-                                setPage
+                    <View
+                        style={
+                            styles.journalSection
+                        }
+                    >
+                        <View
+                            style={
+                                styles.sectionHeader
                             }
-                            placeholder="Écrivez votre journal..."
-                            placeholderTextColor="#999"
-                            multiline
-                            textAlignVertical="top"
-                        />
+                        >
+                            <View>
+                                <Text
+                                    style={
+                                        styles.label
+                                    }
+                                >
+                                    Votre espace
+                                </Text>
+
+                                <Text
+                                    style={
+                                        styles.hint
+                                    }
+                                >
+                                    Relisez, ajoutez ou changez
+                                    ce que vous ressentez.
+                                </Text>
+                            </View>
+
+                            <Ionicons
+                                name="heart-outline"
+                                size={21}
+                                color={colors.primary}
+                            />
+                        </View>
+
+                        <View
+                            style={
+                                styles.paper
+                            }
+                        >
+                            <TextInput
+                                style={
+                                    styles.pageInput
+                                }
+                                value={page}
+                                onChangeText={
+                                    setPage
+                                }
+                                placeholder="Écrivez ce que vous ressentez..."
+                                placeholderTextColor={
+                                    colors.textMuted
+                                }
+                                multiline
+                                textAlignVertical="top"
+                                maxLength={5000}
+                            />
+
+                            <View
+                                style={
+                                    styles.textAreaFooter
+                                }
+                            >
+                                <Text
+                                    style={
+                                        styles.helperText
+                                    }
+                                >
+                                    Prenez votre temps...
+                                </Text>
+
+                                <Text
+                                    style={
+                                        styles.counter
+                                    }
+                                >
+                                    {page.length}/5000
+                                </Text>
+                            </View>
+                        </View>
                     </View>
+
+
+                    {/* Réassurance */}
+
+                    <View
+                        style={
+                            styles.reassurance
+                        }
+                    >
+                        <View
+                            style={
+                                styles.reassuranceIcon
+                            }
+                        >
+                            <Ionicons
+                                name="lock-closed-outline"
+                                size={17}
+                                color={colors.primary}
+                            />
+                        </View>
+
+                        <View
+                            style={
+                                styles.reassuranceContent
+                            }
+                        >
+                            <Text
+                                style={
+                                    styles.reassuranceTitle
+                                }
+                            >
+                                Votre espace personnel
+                            </Text>
+
+                            <Text
+                                style={
+                                    styles.reassuranceText
+                                }
+                            >
+                                Vous pouvez revenir sur vos
+                                mots et les faire évoluer au
+                                fil du temps.
+                            </Text>
+                        </View>
+                    </View>
+
                 </ScrollView>
 
 
                 {/* Bouton */}
+
                 <View
                     style={styles.bottom}
                 >
                     <Button
-                        text="Enregistrer"
+                        text="Enregistrer les changements"
                         onPress={handleSave}
                         isLoading={saving}
                     />
                 </View>
+
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -322,33 +613,48 @@ export const JournalEditScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
+        backgroundColor: colors.background,
     },
 
     keyboard: {
         flex: 1,
     },
 
+
+    /*
+     * Header
+     */
+
     header: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 20,
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: 6,
+        paddingBottom: 10,
     },
 
     headerButton: {
         width: 44,
         height: 44,
+        borderRadius: 22,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
         alignItems: "center",
         justifyContent: "center",
     },
 
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: colors.black,
+    headerCenter: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 7,
+    },
+
+    headerLabel: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: colors.textSecondary,
     },
 
     headerSpacer: {
@@ -356,62 +662,296 @@ const styles = StyleSheet.create({
         height: 44,
     },
 
+
+    /*
+     * Scroll
+     */
+
     scroll: {
         flex: 1,
     },
 
     content: {
-        paddingHorizontal: 24,
-        paddingTop: 16,
-        paddingBottom: 32,
+        paddingHorizontal: 20,
+        paddingTop: 8,
+        paddingBottom: 35,
     },
 
-    field: {
+
+    /*
+     * Introduction
+     */
+
+    introCard: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        backgroundColor: "#FDF8ED",
+        borderRadius: 18,
+        padding: 15,
+        marginBottom: 26,
+    },
+
+    introIcon: {
+        width: 38,
+        height: 38,
+        borderRadius: 13,
+        backgroundColor: "#F8F0DE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 11,
+    },
+
+    introContent: {
+        flex: 1,
+    },
+
+    introTitle: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: colors.black,
+        marginBottom: 4,
+    },
+
+    introText: {
+        fontSize: 12,
+        lineHeight: 18,
+        color: colors.textSecondary,
+    },
+
+
+    /*
+     * Sections
+     */
+
+    titleSection: {
+        marginBottom: 26,
+    },
+
+    journalSection: {
         marginBottom: 24,
     },
 
+    sectionHeader: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        marginBottom: 12,
+    },
+
     label: {
-        fontSize: 15,
-        fontWeight: "600",
+        fontSize: 16,
+        fontWeight: "700",
         color: colors.black,
-        marginBottom: 10,
+        marginBottom: 4,
+    },
+
+    hint: {
+        fontSize: 12,
+        lineHeight: 18,
+        color: colors.textMuted,
+    },
+
+
+    /*
+     * Titre
+     */
+
+    titleCard: {
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        paddingHorizontal: 16,
+        paddingTop: 3,
+        paddingBottom: 8,
     },
 
     titleInput: {
-        borderWidth: 1,
-        borderColor: "#E5E5E5",
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 18,
+        height: 50,
+        padding: 0,
+        fontSize: 17,
         color: colors.black,
+    },
+
+    counter: {
+        alignSelf: "flex-end",
+        marginTop: 5,
+        fontSize: 11,
+        color: colors.textMuted,
+    },
+
+
+    /*
+     * Journal
+     */
+
+    paper: {
         backgroundColor: colors.white,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: 16,
     },
 
     pageInput: {
-        minHeight: 260,
-        borderWidth: 1,
-        borderColor: "#E5E5E5",
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 17,
-        lineHeight: 26,
+        minHeight: 285,
+        padding: 0,
+        fontSize: 16,
+        lineHeight: 27,
         color: colors.black,
+    },
+
+    textAreaFooter: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 12,
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+
+    helperText: {
+        fontSize: 12,
+        fontStyle: "italic",
+        color: colors.textMuted,
+    },
+
+
+    /*
+     * Réassurance
+     */
+
+    reassurance: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: 14,
+        marginBottom: 10,
+    },
+
+    reassuranceIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        backgroundColor: "#F8F0DE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 11,
+    },
+
+    reassuranceContent: {
+        flex: 1,
+    },
+
+    reassuranceTitle: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: colors.black,
+        marginBottom: 3,
+    },
+
+    reassuranceText: {
+        fontSize: 12,
+        lineHeight: 18,
+        color: colors.textSecondary,
+    },
+
+
+    /*
+     * Bottom
+     */
+
+    bottom: {
+        paddingHorizontal: 20,
+        paddingTop: 14,
+        paddingBottom: 16,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
         backgroundColor: colors.white,
     },
 
-    bottom: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        borderTopWidth: 1,
-        borderTopColor: "#ECECEC",
-        backgroundColor: colors.white,
-    },
+
+    /*
+     * Loading
+     */
 
     loading: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+        paddingHorizontal: 40,
+    },
+
+    loadingIcon: {
+        width: 54,
+        height: 54,
+        borderRadius: 18,
+        backgroundColor: "#F8F0DE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
+    },
+
+    loadingIndicator: {
+        marginBottom: 10,
+    },
+
+    loadingText: {
+        fontSize: 13,
+        color: colors.textSecondary,
+    },
+
+
+    /*
+     * Error
+     */
+
+    errorContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 40,
+    },
+
+    errorIcon: {
+        width: 62,
+        height: 62,
+        borderRadius: 21,
+        backgroundColor: "#F8F0DE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 18,
+    },
+
+    errorTitle: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: colors.black,
+        marginBottom: 7,
+    },
+
+    errorText: {
+        fontSize: 14,
+        lineHeight: 21,
+        color: colors.textSecondary,
+        textAlign: "center",
+        marginBottom: 22,
+    },
+
+    errorButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 14,
+        backgroundColor: colors.primary,
+    },
+
+    errorButtonText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: colors.white,
     },
 });
