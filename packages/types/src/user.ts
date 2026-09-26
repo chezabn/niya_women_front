@@ -3,12 +3,19 @@ export interface UserProfile {
     post_count: number;
 }
 
-export interface UserPreview {
+
+export interface UserSearchResult {
     id: number;
     username: string;
+    identity_verified: boolean;
+    profile: number;
+}
 
-    first_name: string;
-    last_name: string;
+export interface UserSearchResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: UserSearchResult[];
 }
 
 export interface User {

@@ -13,4 +13,5 @@ export const colors = {
 
     border: "#E0E0E0",
     background: "#FAFAFA",
+    surface: "#FFFFFF",
 };

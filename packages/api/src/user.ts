@@ -1,4 +1,4 @@
-import {User, UserDelete, UserUpdate} from "../../types";
+import {User, UserDelete, UserSearchResponse, UserUpdate} from "../../types";
 import { apiFetch } from "./client";
 
 
@@ -35,6 +35,19 @@ export const deleteMe = (
         "/users/me/",
         {
             method: "DELETE",
+        },
+        accessToken,
+    )
+}
+
+export const searchUser = (
+    search: string,
+    accessToken: string,
+) => {
+    return apiFetch<UserSearchResponse>(
+        `/users/search/?q=${search}`,
+        {
+            method: "GET",
         },
         accessToken,
     )
