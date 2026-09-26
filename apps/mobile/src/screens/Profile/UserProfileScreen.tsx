@@ -4,9 +4,12 @@ import {
 } from "react";
 
 import {
+    ActivityIndicator,
     RefreshControl,
     ScrollView,
     StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import {
@@ -18,6 +21,10 @@ import {
     useFocusEffect,
     useLocalSearchParams,
 } from "expo-router";
+
+import {
+    Ionicons,
+} from "@expo/vector-icons";
 
 import {
     getUser,
@@ -40,10 +47,6 @@ import {
 } from "@/src/store/authStore";
 
 import {
-    UserProfileHeader,
-} from "@/src/components/profile/UserProfileHeader";
-
-import {
     ProfileStats,
 } from "@/src/components/profile/ProfileStats";
 
@@ -54,6 +57,10 @@ import {
 import {
     PublicationList,
 } from "@/src/components/profile/PublicationList";
+
+import {
+    UserProfileHeader,
+} from "@/src/components/profile/UserProfileHeader";
 
 
 export default function UserProfileScreen() {
@@ -79,6 +86,11 @@ export default function UserProfileScreen() {
     ] = useState<Publication[]>([]);
 
     const [
+        loading,
+        setLoading,
+    ] = useState(true);
+
+    const [
         refreshing,
         setRefreshing,
     ] = useState(false);
@@ -100,10 +112,13 @@ export default function UserProfileScreen() {
                     !accessToken ||
                     !numericUserId
                 ) {
+                    setLoading(false);
                     return;
                 }
 
                 try {
+                    setLoading(true);
+
                     const [
                         userResponse,
                         publicationsResponse,
@@ -112,6 +127,7 @@ export default function UserProfileScreen() {
                             numericUserId,
                             accessToken,
                         ),
+
                         getUserPublications(
                             numericUserId,
                             accessToken,
@@ -130,6 +146,8 @@ export default function UserProfileScreen() {
                         "Erreur lors du chargement du profil utilisateur :",
                         error,
                     );
+                } finally {
+                    setLoading(false);
                 }
             },
             [
@@ -186,6 +204,7 @@ export default function UserProfileScreen() {
         const previousLikeCount =
             publication.like_count;
 
+
         setLikingPublicationIds(
             (current) => [
                 ...current,
@@ -194,6 +213,9 @@ export default function UserProfileScreen() {
         );
 
 
+        /*
+         * Mise à jour optimiste
+         */
         setPosts(
             (current) =>
                 current.map(
@@ -202,8 +224,10 @@ export default function UserProfileScreen() {
                         publication.id
                             ? {
                                 ...item,
+
                                 is_liked:
                                     !wasLiked,
+
                                 like_count:
                                     wasLiked
                                         ? Math.max(
@@ -237,6 +261,9 @@ export default function UserProfileScreen() {
                 error,
             );
 
+            /*
+             * Rollback
+             */
             setPosts(
                 (current) =>
                     current.map(
@@ -245,10 +272,12 @@ export default function UserProfileScreen() {
                             publication.id
                                 ? {
                                     ...item,
+
                                     is_liked:
-                                    wasLiked,
+                                        wasLiked,
+
                                     like_count:
-                                    previousLikeCount,
+                                        previousLikeCount,
                                 }
                                 : item,
                     ),
@@ -275,8 +304,61 @@ export default function UserProfileScreen() {
     };
 
 
+    if (loading) {
+        return (
+            <SafeAreaView
+                style={styles.container}
+            >
+                <View
+                    style={styles.loadingContainer}
+                >
+                    <ActivityIndicator
+                        size="large"
+                        color={
+                            colors.primary
+                        }
+                    />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+
     if (!user) {
-        return null;
+        return (
+            <SafeAreaView
+                style={styles.container}
+            >
+                <View
+                    style={styles.errorContainer}
+                >
+                    <Ionicons
+                        name="person-outline"
+                        size={42}
+                        color={
+                            colors.textMuted
+                        }
+                    />
+
+                    <Text
+                        style={
+                            styles.errorTitle
+                        }
+                    >
+                        Profil introuvable
+                    </Text>
+
+                    <Text
+                        style={
+                            styles.errorText
+                        }
+                    >
+                        Cette utilisatrice n'est
+                        plus disponible.
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
     }
 
 
@@ -305,6 +387,7 @@ export default function UserProfileScreen() {
                     />
                 }
             >
+                {/* Header */}
                 <UserProfileHeader
                     username={
                         user.username
@@ -314,36 +397,194 @@ export default function UserProfileScreen() {
                     }
                 />
 
-                <ProfileStats
-                    posts={
-                        user.profile
-                            .post_count
-                    }
-                    followers={0}
-                    following={0}
-                />
 
-                <ProfileBio
-                    firstName={
-                        user.first_name
+                {/* Profil */}
+                <View
+                    style={
+                        styles.profileSection
                     }
-                    lastName={
-                        user.last_name
-                    }
-                    bio={
-                        user.profile.bio
-                    }
-                />
+                >
+                    <View
+                        style={
+                            styles.avatar
+                        }
+                    >
+                        <Text
+                            style={
+                                styles.avatarText
+                            }
+                        >
+                            {user.username
+                                .charAt(0)
+                                .toUpperCase()}
+                        </Text>
+                    </View>
 
-                <PublicationList
-                    posts={posts}
-                    onPress={
-                        handlePublicationPress
+
+                    <View
+                        style={
+                            styles.identity
+                        }
+                    >
+                        <View
+                            style={
+                                styles.usernameRow
+                            }
+                        >
+                            <Text
+                                style={
+                                    styles.username
+                                }
+                            >
+                                @{user.username}
+                            </Text>
+
+                            {user.identity_verified && (
+                                <Ionicons
+                                    name="checkmark-circle"
+                                    size={19}
+                                    color={
+                                        colors.primary
+                                    }
+                                />
+                            )}
+                        </View>
+
+                        <Text
+                            style={
+                                styles.fullName
+                            }
+                        >
+                            {user.first_name}{" "}
+                            {user.last_name}
+                        </Text>
+                    </View>
+                </View>
+
+
+                {/* Statistiques */}
+                <View
+                    style={
+                        styles.statsCard
                     }
-                    onLike={
-                        handleLike
+                >
+                    <ProfileStats
+                        posts={
+                            user.profile
+                                .post_count
+                        }
+                        followers={0}
+                        following={0}
+                    />
+                </View>
+
+
+                {/* Bio */}
+                <View
+                    style={
+                        styles.bioSection
                     }
-                />
+                >
+                    <ProfileBio
+                        firstName={
+                            user.first_name
+                        }
+                        lastName={
+                            user.last_name
+                        }
+                        bio={
+                            user.profile.bio
+                        }
+                        showName={false}
+                    />
+                </View>
+
+
+                {/* Publications */}
+                <View
+                    style={
+                        styles.publicationsHeader
+                    }
+                >
+                    <View
+                        style={
+                            styles.publicationsTitleRow
+                        }
+                    >
+                        <Ionicons
+                            name="grid-outline"
+                            size={18}
+                            color={
+                                colors.primary
+                            }
+                        />
+
+                        <Text
+                            style={
+                                styles.publicationsTitle
+                            }
+                        >
+                            Publications
+                        </Text>
+                    </View>
+
+                    <View
+                        style={
+                            styles.publicationsLine
+                        }
+                    />
+                </View>
+
+
+                {posts.length > 0 ? (
+                    <PublicationList
+                        posts={posts}
+                        onPress={
+                            handlePublicationPress
+                        }
+                        onLike={
+                            handleLike
+                        }
+                    />
+                ) : (
+                    <View
+                        style={
+                            styles.emptyPosts
+                        }
+                    >
+                        <View
+                            style={
+                                styles.emptyIconContainer
+                            }
+                        >
+                            <Ionicons
+                                name="images-outline"
+                                size={28}
+                                color={
+                                    colors.textMuted
+                                }
+                            />
+                        </View>
+
+                        <Text
+                            style={
+                                styles.emptyTitle
+                            }
+                        >
+                            Aucune publication
+                        </Text>
+
+                        <Text
+                            style={
+                                styles.emptyText
+                            }
+                        >
+                            Cette utilisatrice
+                            n'a pas encore publié
+                            de contenu.
+                        </Text>
+                    </View>
+                )}
             </ScrollView>
         </SafeAreaView>
     );
@@ -355,13 +596,179 @@ const styles =
         container: {
             flex: 1,
             backgroundColor:
-            colors.white,
+                colors.background,
         },
 
         content: {
             flexGrow: 1,
             paddingHorizontal: 16,
-            paddingTop: 16,
-            paddingBottom: 32,
+            paddingTop: 8,
+            paddingBottom: 40,
+        },
+
+        /*
+         * Chargement
+         */
+        loadingContainer: {
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+        },
+
+        /*
+         * Profil
+         */
+        profileSection: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 24,
+            paddingHorizontal: 4,
+        },
+
+        avatar: {
+            width: 72,
+            height: 72,
+            borderRadius: 36,
+            backgroundColor:
+                colors.primary,
+            alignItems: "center",
+            justifyContent: "center",
+        },
+
+        avatarText: {
+            fontSize: 28,
+            fontWeight: "700",
+            color: colors.white,
+        },
+
+        identity: {
+            flex: 1,
+            marginLeft: 16,
+        },
+
+        usernameRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 5,
+        },
+
+        username: {
+            fontSize: 19,
+            fontWeight: "700",
+            color: colors.black,
+        },
+
+        fullName: {
+            fontSize: 14,
+            color: colors.textSecondary,
+        },
+
+        /*
+         * Statistiques
+         */
+        statsCard: {
+            backgroundColor:
+                colors.white,
+            borderRadius: 16,
+            paddingVertical: 6,
+            marginBottom: 20,
+
+            borderWidth: 1,
+            borderColor:
+                colors.border,
+        },
+
+        /*
+         * Bio
+         */
+        bioSection: {
+            paddingHorizontal: 4,
+            marginBottom: 4,
+        },
+
+        /*
+         * Publications
+         */
+        publicationsHeader: {
+            marginTop: 8,
+        },
+
+        publicationsTitleRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 12,
+        },
+
+        publicationsTitle: {
+            fontSize: 17,
+            fontWeight: "700",
+            color: colors.black,
+        },
+
+        publicationsLine: {
+            height: 1,
+            backgroundColor:
+                colors.border,
+        },
+
+        /*
+         * Aucun post
+         */
+        emptyPosts: {
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 30,
+            paddingVertical: 50,
+        },
+
+        emptyIconContainer: {
+            width: 58,
+            height: 58,
+            borderRadius: 29,
+            backgroundColor:
+                colors.lightGray,
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 14,
+        },
+
+        emptyTitle: {
+            fontSize: 17,
+            fontWeight: "700",
+            color: colors.black,
+            marginBottom: 6,
+        },
+
+        emptyText: {
+            fontSize: 14,
+            lineHeight: 20,
+            color: colors.textSecondary,
+            textAlign: "center",
+        },
+
+        /*
+         * Erreur
+         */
+        errorContainer: {
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 40,
+        },
+
+        errorTitle: {
+            marginTop: 14,
+            fontSize: 18,
+            fontWeight: "700",
+            color: colors.black,
+        },
+
+        errorText: {
+            marginTop: 6,
+            fontSize: 14,
+            color: colors.textSecondary,
+            textAlign: "center",
         },
     });

@@ -11,18 +11,22 @@ interface Props {
     firstName: string;
     lastName: string;
     bio?: string;
+    showName?: boolean;
 }
 
 export const ProfileBio = ({
-                               firstName,
-                               lastName,
-                               bio,
-                           }: Props) => {
+   firstName,
+   lastName,
+   bio,
+   showName = true,
+}: Props) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.name}>
-                {firstName} {lastName}
-            </Text>
+            {showName && (
+                <Text style={styles.name}>
+                    {firstName} {lastName}
+                </Text>
+            )}
 
             {!!bio && (
                 <Text style={styles.bio}>
