@@ -16,6 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { router } from "expo-router";
 
+import { Ionicons } from "@expo/vector-icons";
+
 import { colors } from "@/src/theme";
 import { Button } from "@/src/components/ui/Button";
 
@@ -96,57 +98,149 @@ export const NewPublicationScreen = () => {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    <Text style={styles.title}>
-                        Nouvelle publication
-                    </Text>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <View style={styles.headerIcon}>
+                            <Ionicons
+                                name="create-outline"
+                                size={22}
+                                color={colors.primary}
+                            />
+                        </View>
 
-                    <View style={styles.field}>
-                        <Text style={styles.label}>
-                            Publication
-                        </Text>
+                        <View style={styles.headerText}>
+                            <Text style={styles.title}>
+                                Nouvelle publication
+                            </Text>
+
+                            <Text style={styles.subtitle}>
+                                Partagez ce que vous avez envie
+                                d'exprimer aujourd'hui.
+                            </Text>
+                        </View>
+                    </View>
+
+
+                    {/* Zone d'écriture */}
+                    <View style={styles.writeCard}>
+                        <View style={styles.fieldHeader}>
+                            <View>
+                                <Text style={styles.label}>
+                                    Votre publication
+                                </Text>
+
+                                <Text style={styles.hint}>
+                                    Écrivez librement, sans pression.
+                                </Text>
+                            </View>
+
+                            <Ionicons
+                                name="heart-outline"
+                                size={22}
+                                color={colors.primary}
+                            />
+                        </View>
 
                         <TextInput
                             style={styles.captionInput}
                             value={caption}
                             onChangeText={setCaption}
-                            placeholder="Écrivez votre publication..."
-                            placeholderTextColor="#999"
+                            placeholder="Qu'avez-vous envie de partager ?"
+                            placeholderTextColor={
+                                colors.textMuted
+                            }
                             multiline
                             textAlignVertical="top"
+                            maxLength={2000}
                         />
-                    </View>
 
-                    <View style={styles.setting}>
-                        <View style={styles.settingText}>
-                            <Text style={styles.settingTitle}>
-                                Commentaires
+                        <View style={styles.inputFooter}>
+                            <Text style={styles.helperText}>
+                                Votre publication sera visible
+                                par les autres utilisatrices.
                             </Text>
 
-                            <Text
-                                style={
-                                    styles.settingDescription
-                                }
-                            >
-                                Autoriser les autres utilisateurs
-                                à commenter cette publication.
+                            <Text style={styles.counter}>
+                                {caption.length}/2000
                             </Text>
                         </View>
+                    </View>
 
-                        <Switch
-                            value={commentsEnabled}
-                            onValueChange={
-                                setCommentsEnabled
-                            }
-                            trackColor={{
-                                false: "#D9D9D9",
-                                true: colors.primary,
-                            }}
-                            thumbColor={colors.white}
+
+                    {/* Options */}
+                    <View style={styles.optionsSection}>
+                        <Text style={styles.sectionTitle}>
+                            Options
+                        </Text>
+
+                        <View style={styles.settingCard}>
+                            <View
+                                style={
+                                    styles.settingIconContainer
+                                }
+                            >
+                                <Ionicons
+                                    name="chatbubble-outline"
+                                    size={21}
+                                    color={colors.primary}
+                                />
+                            </View>
+
+                            <View style={styles.settingText}>
+                                <Text
+                                    style={
+                                        styles.settingTitle
+                                    }
+                                >
+                                    Autoriser les commentaires
+                                </Text>
+
+                                <Text
+                                    style={
+                                        styles.settingDescription
+                                    }
+                                >
+                                    Les autres utilisatrices
+                                    pourront commenter votre
+                                    publication.
+                                </Text>
+                            </View>
+
+                            <Switch
+                                value={commentsEnabled}
+                                onValueChange={
+                                    setCommentsEnabled
+                                }
+                                trackColor={{
+                                    false: colors.lightGray,
+                                    true: colors.primary,
+                                }}
+                                thumbColor={colors.white}
+                                ios_backgroundColor={
+                                    colors.lightGray
+                                }
+                            />
+                        </View>
+                    </View>
+
+
+                    {/* Petit rappel */}
+                    <View style={styles.reassurance}>
+                        <Ionicons
+                            name="shield-checkmark-outline"
+                            size={19}
+                            color={colors.textSecondary}
                         />
+
+                        <Text style={styles.reassuranceText}>
+                            Prenez votre temps. Vous pouvez
+                            modifier votre publication plus tard.
+                        </Text>
                     </View>
                 </ScrollView>
 
-                {/* Bouton toujours en bas */}
+
+                {/* Bouton fixe en bas */}
                 <View style={styles.bottom}>
                     <Button
                         text="Publier"
@@ -163,7 +257,7 @@ export const NewPublicationScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
+        backgroundColor: colors.background,
     },
 
     keyboard: {
@@ -175,74 +269,200 @@ const styles = StyleSheet.create({
     },
 
     content: {
-        paddingHorizontal: 24,
-        paddingTop: 24,
-        paddingBottom: 32,
+        paddingHorizontal: 20,
+        paddingTop: 18,
+        paddingBottom: 40,
+    },
+
+
+    /*
+     * Header
+     */
+
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 24,
+    },
+
+    headerIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        backgroundColor: "#F8F0DE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 14,
+    },
+
+    headerText: {
+        flex: 1,
     },
 
     title: {
-        fontSize: 28,
+        fontSize: 25,
         fontWeight: "700",
         color: colors.black,
-        marginBottom: 24,
+        marginBottom: 5,
     },
 
-    field: {
-        marginBottom: 24,
+    subtitle: {
+        fontSize: 14,
+        lineHeight: 20,
+        color: colors.textSecondary,
+    },
+
+
+    /*
+     * Zone d'écriture
+     */
+
+    writeCard: {
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        padding: 18,
+        borderWidth: 1,
+        borderColor: colors.border,
+        marginBottom: 26,
+    },
+
+    fieldHeader: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        marginBottom: 14,
     },
 
     label: {
-        fontSize: 15,
-        fontWeight: "600",
+        fontSize: 16,
+        fontWeight: "700",
         color: colors.black,
-        marginBottom: 10,
+        marginBottom: 3,
+    },
+
+    hint: {
+        fontSize: 13,
+        color: colors.textMuted,
     },
 
     captionInput: {
         minHeight: 220,
-        borderWidth: 1,
-        borderColor: "#E5E5E5",
-        borderRadius: 12,
         paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 17,
-        lineHeight: 26,
+        paddingVertical: 15,
+        borderRadius: 14,
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.border,
+        fontSize: 16,
+        lineHeight: 25,
         color: colors.black,
-        backgroundColor: colors.white,
     },
 
-    setting: {
+    inputFooter: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginTop: 10,
+    },
+
+    helperText: {
+        flex: 1,
+        fontSize: 12,
+        lineHeight: 17,
+        color: colors.textMuted,
+        paddingRight: 12,
+    },
+
+    counter: {
+        fontSize: 12,
+        color: colors.textMuted,
+    },
+
+
+    /*
+     * Options
+     */
+
+    optionsSection: {
+        marginBottom: 22,
+    },
+
+    sectionTitle: {
+        fontSize: 17,
+        fontWeight: "700",
+        color: colors.black,
+        marginBottom: 12,
+    },
+
+    settingCard: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 16,
-        borderTopWidth: 1,
-        borderTopColor: "#ECECEC",
+        backgroundColor: colors.white,
+        borderRadius: 18,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+
+    settingIconContainer: {
+        width: 42,
+        height: 42,
+        borderRadius: 14,
+        backgroundColor: "#F8F0DE",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 12,
     },
 
     settingText: {
         flex: 1,
-        paddingRight: 16,
+        paddingRight: 10,
     },
 
     settingTitle: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: "600",
         color: colors.black,
         marginBottom: 4,
     },
 
     settingDescription: {
-        fontSize: 13,
-        lineHeight: 19,
-        color: "#888",
+        fontSize: 12,
+        lineHeight: 18,
+        color: colors.textSecondary,
     },
 
+
+    /*
+     * Réassurance
+     */
+
+    reassurance: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        paddingHorizontal: 6,
+        marginTop: 2,
+    },
+
+    reassuranceText: {
+        flex: 1,
+        marginLeft: 8,
+        fontSize: 12,
+        lineHeight: 18,
+        color: colors.textSecondary,
+    },
+
+
+    /*
+     * Bouton
+     */
+
     bottom: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
+        paddingHorizontal: 20,
+        paddingTop: 14,
+        paddingBottom: 16,
         borderTopWidth: 1,
-        borderTopColor: "#ECECEC",
+        borderTopColor: colors.border,
         backgroundColor: colors.white,
     },
 });
