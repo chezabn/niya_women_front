@@ -21,6 +21,8 @@ import {
 import {
     getMe,
     getMyPublications,
+    likePublication,
+    unlikePublication,
 } from "@niyya/api";
 
 import {
@@ -54,8 +56,8 @@ import {
 } from "@/src/components/profile/ProfileTabs";
 
 import {
-    PostGrid,
-} from "@/src/components/profile/ProfileGrid";
+    PublicationList,
+} from "@/src/components/profile/PublicationList";
 
 
 export const ProfileScreen = () => {
@@ -88,6 +90,10 @@ export const ProfileScreen = () => {
         setPosts,
     ] = useState<Publication[]>([]);
 
+    const [
+        likingPublicationIds,
+        setLikingPublicationIds,
+    ] = useState<number[]>([]);
 
     const handleEditProfile = () => {
         router.push(
@@ -100,6 +106,110 @@ export const ProfileScreen = () => {
         router.push(
             "/journal",
         );
+    };
+
+    const handleLike = async (
+        publication: Publication,
+    ) => {
+        if (!accessToken) {
+            return;
+        }
+
+        if (
+            likingPublicationIds.includes(
+                publication.id,
+            )
+        ) {
+            return;
+        }
+
+        const wasLiked =
+            publication.is_liked;
+
+        const previousLikeCount =
+            publication.like_count;
+
+        setLikingPublicationIds(
+            (current) => [
+                ...current,
+                publication.id,
+            ],
+        );
+
+        /*
+         * Mise à jour immédiate
+         */
+        setPosts(
+            (current) =>
+                current.map(
+                    (item) =>
+                        item.id ===
+                        publication.id
+                            ? {
+                                ...item,
+                                is_liked:
+                                    !wasLiked,
+                                like_count:
+                                    wasLiked
+                                        ? Math.max(
+                                            0,
+                                            previousLikeCount -
+                                            1,
+                                        )
+                                        : previousLikeCount +
+                                        1,
+                            }
+                            : item,
+                ),
+        );
+
+        try {
+            if (wasLiked) {
+                await unlikePublication(
+                    accessToken,
+                    publication.id,
+                );
+            } else {
+                await likePublication(
+                    accessToken,
+                    publication.id,
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Erreur lors de la modification du like :",
+                error,
+            );
+
+            /*
+             * Rollback si l'API échoue
+             */
+            setPosts(
+                (current) =>
+                    current.map(
+                        (item) =>
+                            item.id ===
+                            publication.id
+                                ? {
+                                    ...item,
+                                    is_liked:
+                                    wasLiked,
+                                    like_count:
+                                    previousLikeCount,
+                                }
+                                : item,
+                    ),
+            );
+        } finally {
+            setLikingPublicationIds(
+                (current) =>
+                    current.filter(
+                        (id) =>
+                            id !==
+                            publication.id,
+                    ),
+            );
+        }
     };
 
     const handlePublicationPress = (
@@ -296,9 +406,10 @@ export const ProfileScreen = () => {
                 {activeTab ===
                     "posts" &&
                     posts.length > 0 && (
-                        <PostGrid
+                        <PublicationList
                             posts={posts}
                             onPress={handlePublicationPress}
+                            onLike={handleLike}
                         />
                     )}
             </ScrollView>

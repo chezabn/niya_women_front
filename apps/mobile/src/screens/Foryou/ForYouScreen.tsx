@@ -272,6 +272,9 @@ export const ForYouScreen = () => {
         );
     };
 
+    const [likingPublicationIds, setLikingPublicationIds] =
+        useState<number[]>([]);
+
     const handleLike = async (
         publication: Publication,
     ) => {
@@ -279,29 +282,81 @@ export const ForYouScreen = () => {
             return;
         }
 
-        try {
-            const updatedPublication =
-                publication.is_liked
-                    ? await unlikePublication(
-                        accessToken,
-                        publication.id,
-                    )
-                    : await likePublication(
-                        accessToken,
-                        publication.id,
-                    );
+        // Empêche plusieurs clics pendant la requête
+        if (likingPublicationIds.includes(publication.id)) {
+            return;
+        }
 
-            setPublications((current) =>
-                current.map((item) =>
-                    item.id === updatedPublication.id
-                        ? updatedPublication
-                        : item,
-                ),
-            );
+        const wasLiked = publication.is_liked;
+        const previousLikeCount = publication.like_count;
+
+        // Ajoute la publication aux requêtes en cours
+        setLikingPublicationIds((current) => [
+            ...current,
+            publication.id,
+        ]);
+
+        /*
+         * Mise à jour immédiate de l'interface
+         */
+        setPublications((current) =>
+            current.map((item) =>
+                item.id === publication.id
+                    ? {
+                        ...item,
+                        is_liked: !wasLiked,
+                        like_count: wasLiked
+                            ? Math.max(0, previousLikeCount - 1)
+                            : previousLikeCount + 1,
+                    }
+                    : item,
+            ),
+        );
+
+        try {
+            /*
+             * Requête backend
+             */
+            if (wasLiked) {
+                await unlikePublication(
+                    accessToken,
+                    publication.id,
+                );
+            } else {
+                await likePublication(
+                    accessToken,
+                    publication.id,
+                );
+            }
         } catch (error) {
             console.error(
                 "Erreur lors de la modification du like :",
                 error,
+            );
+
+            /*
+             * Le backend a échoué :
+             * on restaure l'ancien état.
+             */
+            setPublications((current) =>
+                current.map((item) =>
+                    item.id === publication.id
+                        ? {
+                            ...item,
+                            is_liked: wasLiked,
+                            like_count: previousLikeCount,
+                        }
+                        : item,
+                ),
+            );
+        } finally {
+            /*
+             * La requête est terminée
+             */
+            setLikingPublicationIds((current) =>
+                current.filter(
+                    (id) => id !== publication.id,
+                ),
             );
         }
     };

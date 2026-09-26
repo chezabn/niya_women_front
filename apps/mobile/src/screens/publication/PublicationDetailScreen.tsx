@@ -6,10 +6,10 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from "react-native";
 
@@ -31,6 +31,8 @@ import { Publication } from "@niyya/types";
 import {
     getMyPublication,
     deletePublication,
+    likePublication,
+    unlikePublication,
 } from "@niyya/api";
 
 import { useAuthStore } from "@/src/store/authStore";
@@ -87,6 +89,11 @@ export const PublicationDetailScreen = () => {
         setLoading,
     ] = useState(true);
 
+    const [
+        liking,
+        setLiking,
+    ] = useState(false);
+
     useFocusEffect(
         useCallback(() => {
             const loadPublication =
@@ -108,9 +115,7 @@ export const PublicationDetailScreen = () => {
                                 accessToken,
                             );
 
-                        setPublication(
-                            data,
-                        );
+                        setPublication(data);
                     } catch (error) {
                         console.error(
                             "Erreur lors du chargement de la publication :",
@@ -133,6 +138,89 @@ export const PublicationDetailScreen = () => {
         !!publication &&
         user.id ===
         publication.author.id;
+
+    /**
+     * Like / unlike optimiste.
+     *
+     * On met immédiatement à jour l'interface,
+     * puis on synchronise avec le backend.
+     *
+     * En cas d'erreur, on restaure l'état précédent.
+     */
+    const handleLike = async () => {
+        if (
+            !publication ||
+            !accessToken ||
+            liking
+        ) {
+            return;
+        }
+
+        const wasLiked =
+            publication.is_liked;
+
+        const previousLikeCount =
+            publication.like_count;
+
+        // Mise à jour immédiate de l'interface.
+        setPublication(
+            (current) => {
+                if (!current) {
+                    return current;
+                }
+
+                return {
+                    ...current,
+                    is_liked: !wasLiked,
+                    like_count: wasLiked
+                        ? Math.max(
+                            0,
+                            previousLikeCount - 1,
+                        )
+                        : previousLikeCount + 1,
+                };
+            },
+        );
+
+        setLiking(true);
+
+        try {
+            if (wasLiked) {
+                await unlikePublication(
+                    accessToken,
+                    publication.id,
+                );
+            } else {
+                await likePublication(
+                    accessToken,
+                    publication.id,
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Erreur lors de la modification du like :",
+                error,
+            );
+
+            // Rollback si l'API échoue.
+            setPublication(
+                (current) => {
+                    if (!current) {
+                        return current;
+                    }
+
+                    return {
+                        ...current,
+                        is_liked: wasLiked,
+                        like_count:
+                        previousLikeCount,
+                    };
+                },
+            );
+        } finally {
+            setLiking(false);
+        }
+    };
 
     const handleDelete = () => {
         if (
@@ -195,14 +283,10 @@ export const PublicationDetailScreen = () => {
     if (loading) {
         return (
             <SafeAreaView
-                style={
-                    styles.container
-                }
+                style={styles.container}
             >
                 <View
-                    style={
-                        styles.loading
-                    }
+                    style={styles.loading}
                 >
                     <ActivityIndicator
                         size="large"
@@ -218,69 +302,117 @@ export const PublicationDetailScreen = () => {
     if (!publication) {
         return (
             <SafeAreaView
-                style={
-                    styles.container
-                }
+                style={styles.container}
             >
                 <View
-                    style={
-                        styles.loading
-                    }
+                    style={styles.loading}
                 >
-                    <Text>
+                    <Ionicons
+                        name="document-text-outline"
+                        size={42}
+                        color="#B5B5B5"
+                    />
+
+                    <Text
+                        style={
+                            styles.notFoundTitle
+                        }
+                    >
                         Publication
-                        introuvable.
+                        introuvable
                     </Text>
+
+                    <Text
+                        style={
+                            styles.notFoundText
+                        }
+                    >
+                        Cette publication
+                        n'existe plus ou
+                        n'est plus
+                        accessible.
+                    </Text>
+
+                    <Pressable
+                        onPress={() =>
+                            router.back()
+                        }
+                        style={
+                            styles.backLink
+                        }
+                    >
+                        <Text
+                            style={
+                                styles.backLinkText
+                            }
+                        >
+                            Retour
+                        </Text>
+                    </Pressable>
                 </View>
             </SafeAreaView>
         );
     }
 
+    const authorInitial =
+        publication.author.username
+            .charAt(0)
+            .toUpperCase();
+
     return (
         <SafeAreaView
-            style={
-                styles.container
-            }
+            style={styles.container}
         >
+            {/* Header */}
             <View
-                style={
-                    styles.header
-                }
+                style={styles.header}
             >
-                <TouchableOpacity
+                <Pressable
                     style={
                         styles.headerButton
                     }
                     onPress={() =>
                         router.back()
                     }
-                    activeOpacity={0.7}
+                    hitSlop={8}
                 >
                     <Ionicons
                         name="arrow-back"
-                        size={26}
+                        size={24}
                         color={
                             colors.black
                         }
                     />
-                </TouchableOpacity>
+                </Pressable>
 
-                {isOwner && (
-                    <TouchableOpacity
+                <Text
+                    style={styles.headerTitle}
+                >
+                    Publication
+                </Text>
+
+                {isOwner ? (
+                    <Pressable
                         style={
                             styles.headerButton
                         }
                         onPress={
                             handleDelete
                         }
-                        activeOpacity={0.7}
+                        hitSlop={8}
                     >
                         <Ionicons
                             name="trash-outline"
-                            size={24}
+                            size={22}
                             color="#D9534F"
                         />
-                    </TouchableOpacity>
+                    </Pressable>
+                ) : (
+                    <View
+                        style={
+                            styles.headerButton
+                        }
+                    />
                 )}
             </View>
 
@@ -293,80 +425,259 @@ export const PublicationDetailScreen = () => {
                 }
                 keyboardShouldPersistTaps="handled"
             >
-                <Text
+                {/* Author */}
+                <View
                     style={
-                        styles.username
+                        styles.authorContainer
                     }
                 >
-                    {
-                        publication.author
-                            .username
-                    }
-                </Text>
-
-                {publication.caption ? (
-                    <Text
+                    <View
                         style={
-                            styles.caption
+                            styles.authorAvatar
                         }
                     >
-                        {
-                            publication.caption
-                        }
-                    </Text>
-                ) : null}
+                        <Text
+                            style={
+                                styles.authorAvatarText
+                            }
+                        >
+                            {authorInitial}
+                        </Text>
+                    </View>
 
-                {publication.is_edited && (
-                    <Text
+                    <View
                         style={
-                            styles.edited
+                            styles.authorInfo
                         }
                     >
-                        Publication modifiée
-                    </Text>
-                )}
+                        <Text
+                            style={
+                                styles.username
+                            }
+                        >
+                            {
+                                publication
+                                    .author
+                                    .username
+                            }
+                        </Text>
 
-                <Text
+                        <Text
+                            style={
+                                styles.date
+                            }
+                        >
+                            {formatDate(
+                                publication.created_at,
+                            )}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Publication */}
+                <View
                     style={
-                        styles.date
+                        styles.publicationCard
                     }
                 >
-                    {formatDate(
-                        publication.created_at,
+                    {publication.caption ? (
+                        <Text
+                            style={
+                                styles.caption
+                            }
+                        >
+                            {
+                                publication.caption
+                            }
+                        </Text>
+                    ) : (
+                        <Text
+                            style={
+                                styles.emptyCaption
+                            }
+                        >
+                            Cette publication
+                            ne contient pas
+                            de texte.
+                        </Text>
                     )}
-                </Text>
 
-                <Text
+                    {publication.is_edited && (
+                        <View
+                            style={
+                                styles.editedBadge
+                            }
+                        >
+                            <Ionicons
+                                name="create-outline"
+                                size={14}
+                                color={
+                                    colors.primary
+                                }
+                            />
+
+                            <Text
+                                style={
+                                    styles.editedText
+                                }
+                            >
+                                Modifiée
+                            </Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* Interactions */}
+                <View
                     style={
-                        styles.commentsStatus
+                        styles.interactions
                     }
                 >
-                    {publication
-                        .comments_enabled
-                        ? "Commentaires activés"
-                        : "Commentaires désactivés"}
-                </Text>
+                    <Pressable
+                        style={
+                            styles.likeButton
+                        }
+                        onPress={
+                            handleLike
+                        }
+                        disabled={liking}
+                        hitSlop={8}
+                    >
+                        {liking ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={
+                                    publication.is_liked
+                                        ? "#E88A9A"
+                                        : "#777"
+                                }
+                            />
+                        ) : (
+                            <Ionicons
+                                name={
+                                    publication.is_liked
+                                        ? "heart"
+                                        : "heart-outline"
+                                }
+                                size={25}
+                                color={
+                                    publication.is_liked
+                                        ? "#E88A9A"
+                                        : "#777"
+                                }
+                            />
+                        )}
 
-                {publication.comments_enabled && (
-                    <CommentList
-                        publicationId={
-                            publication.id
+                        <Text
+                            style={[
+                                styles.likeCount,
+                                publication.is_liked &&
+                                styles.likeCountActive,
+                            ]}
+                        >
+                            {publication.like_count}
+                        </Text>
+
+                        <Text
+                            style={
+                                styles.likeLabel
+                            }
+                        >
+                            {publication.like_count ===
+                            1
+                                ? "J'aime"
+                                : "J'aime"}
+                        </Text>
+                    </Pressable>
+
+                    <View
+                        style={
+                            styles.commentStatus
                         }
-                        publicationAuthorId={
-                            publication.author.id
+                    >
+                        <Ionicons
+                            name="chatbubble-outline"
+                            size={21}
+                            color="#888"
+                        />
+
+                        <Text
+                            style={
+                                styles.commentStatusText
+                            }
+                        >
+                            {publication
+                                .comments_enabled
+                                ? "Commentaires"
+                                : "Commentaires désactivés"}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Divider */}
+                <View
+                    style={styles.divider}
+                />
+
+                {/* Comments */}
+                {publication.comments_enabled ? (
+                    <View
+                        style={
+                            styles.commentsSection
                         }
-                    />
+                    >
+                        <Text
+                            style={
+                                styles.sectionTitle
+                            }
+                        >
+                            Commentaires
+                        </Text>
+
+                        <CommentList
+                            publicationId={
+                                publication.id
+                            }
+                            publicationAuthorId={
+                                publication
+                                    .author
+                                    .id
+                            }
+                        />
+                    </View>
+                ) : (
+                    <View
+                        style={
+                            styles.commentsDisabled
+                        }
+                    >
+                        <Ionicons
+                            name="chatbubble-ellipses-outline"
+                            size={24}
+                            color="#B0B0B0"
+                        />
+
+                        <Text
+                            style={
+                                styles.commentsDisabledText
+                            }
+                        >
+                            Les commentaires
+                            sont désactivés
+                            pour cette
+                            publication.
+                        </Text>
+                    </View>
                 )}
             </ScrollView>
 
+            {/* Edit button */}
             {isOwner && (
                 <View
-                    style={
-                        styles.bottom
-                    }
+                    style={styles.bottom}
                 >
                     <Button
-                        text="Modifier"
+                        text="Modifier la publication"
                         onPress={
                             handleEdit
                         }
@@ -400,65 +711,203 @@ const styles = StyleSheet.create({
     },
 
     header: {
+        height: 60,
         flexDirection: "row",
+        alignItems: "center",
         justifyContent:
             "space-between",
-        alignItems: "center",
-        paddingHorizontal: 20,
-        paddingTop: 8,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor:
+            "#F0F0F0",
+        backgroundColor:
+        colors.white,
     },
 
     headerButton: {
-        width: 44,
-        height: 44,
+        width: 42,
+        height: 42,
         alignItems: "center",
         justifyContent:
             "center",
     },
 
+    headerTitle: {
+        fontSize: 17,
+        fontWeight: "700",
+        color: colors.black,
+    },
+
     content: {
-        paddingHorizontal: 24,
-        paddingTop: 16,
-        paddingBottom: 32,
+        paddingHorizontal: 20,
+        paddingTop: 22,
+        paddingBottom: 40,
+    },
+
+    authorContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 22,
+    },
+
+    authorAvatar: {
+        width: 46,
+        height: 46,
+        borderRadius: 23,
+        backgroundColor:
+        colors.primary,
+        alignItems: "center",
+        justifyContent:
+            "center",
+        marginRight: 12,
+    },
+
+    authorAvatarText: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: colors.white,
+    },
+
+    authorInfo: {
+        flex: 1,
     },
 
     username: {
         fontSize: 16,
         fontWeight: "700",
         color: colors.black,
-        marginBottom: 16,
-    },
-
-    caption: {
-        fontSize: 18,
-        lineHeight: 26,
-        color: colors.black,
-        marginBottom: 16,
-    },
-
-    edited: {
-        fontSize: 13,
-        fontWeight: "600",
-        color: colors.primary,
-        marginBottom: 8,
     },
 
     date: {
         fontSize: 13,
-        color: "#888",
-        marginBottom: 8,
+        color: "#8A8A8A",
+        marginTop: 3,
     },
 
-    commentsStatus: {
+    publicationCard: {
+        backgroundColor:
+            "#FAFAFA",
+        borderRadius: 16,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: "#F0F0F0",
+    },
+
+    caption: {
+        fontSize: 18,
+        lineHeight: 28,
+        color: colors.black,
+    },
+
+    emptyCaption: {
+        fontSize: 15,
+        fontStyle: "italic",
+        lineHeight: 22,
+        color: "#999",
+    },
+
+    editedBadge: {
+        alignSelf: "flex-start",
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 18,
+        paddingHorizontal: 9,
+        paddingVertical: 5,
+        borderRadius: 8,
+        backgroundColor:
+            "#FBF5E7",
+    },
+
+    editedText: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: colors.primary,
+        marginLeft: 5,
+    },
+
+    interactions: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent:
+            "space-between",
+        paddingVertical: 18,
+    },
+
+    likeButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        minHeight: 36,
+    },
+
+    likeCount: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#777",
+        marginLeft: 8,
+    },
+
+    likeCountActive: {
+        color: "#E88A9A",
+    },
+
+    likeLabel: {
         fontSize: 13,
         color: "#888",
+        marginLeft: 5,
+    },
+
+    commentStatus: {
+        flexDirection: "row",
+        alignItems: "center",
+        maxWidth: "55%",
+    },
+
+    commentStatusText: {
+        fontSize: 13,
+        color: "#888",
+        marginLeft: 7,
+    },
+
+    divider: {
+        height: 1,
+        backgroundColor:
+            "#ECECEC",
+        marginBottom: 20,
+    },
+
+    commentsSection: {
+        paddingBottom: 20,
+    },
+
+    sectionTitle: {
+        fontSize: 17,
+        fontWeight: "700",
+        color: colors.black,
+        marginBottom: 14,
+    },
+
+    commentsDisabled: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 18,
+        paddingHorizontal: 4,
+    },
+
+    commentsDisabledText: {
+        flex: 1,
+        fontSize: 14,
+        lineHeight: 20,
+        color: "#999",
+        marginLeft: 10,
     },
 
     bottom: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
+        paddingHorizontal: 20,
+        paddingTop: 12,
+        paddingBottom: 16,
         borderTopWidth: 1,
-        borderTopColor: "#ECECEC",
+        borderTopColor:
+            "#ECECEC",
         backgroundColor:
         colors.white,
     },
@@ -468,5 +917,33 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent:
             "center",
+    },
+
+    notFoundTitle: {
+        marginTop: 14,
+        fontSize: 18,
+        fontWeight: "700",
+        color: colors.black,
+    },
+
+    notFoundText: {
+        marginTop: 6,
+        fontSize: 14,
+        lineHeight: 20,
+        color: "#888",
+        textAlign: "center",
+        paddingHorizontal: 40,
+    },
+
+    backLink: {
+        marginTop: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+
+    backLinkText: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: colors.primary,
     },
 });
