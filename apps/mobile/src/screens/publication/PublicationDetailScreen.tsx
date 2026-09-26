@@ -328,8 +328,8 @@ export const PublicationDetailScreen = () => {
                         }
                     >
                         Cette publication
-                        n'existe plus ou
-                        n'est plus
+                        n&apos;existe plus ou
+                        n&apos;est plus
                         accessible.
                     </Text>
 
@@ -450,17 +450,22 @@ export const PublicationDetailScreen = () => {
                             styles.authorInfo
                         }
                     >
-                        <Text
-                            style={
-                                styles.username
+                        <Pressable
+                            onPress={() =>
+                                router.push(
+                                    `/profile/${publication.author.id}`,
+                                )
                             }
+                            accessibilityRole="button"
+                            accessibilityLabel={`Voir le profil de ${publication.author.username}`}
+                            hitSlop={6}
                         >
-                            {
-                                publication
-                                    .author
-                                    .username
-                            }
-                        </Text>
+                            <Text
+                                style={styles.username}
+                            >
+                                {publication.author.username}
+                            </Text>
+                        </Pressable>
 
                         <Text
                             style={
