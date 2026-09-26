@@ -18,6 +18,21 @@ export interface UserSearchResponse {
     results: UserSearchResult[];
 }
 
+export interface UserPreview {
+    id: number;
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    identity_verified?: boolean;
+}
+
+export interface UserPreviewListResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: UserPreview[];
+}
+
 export interface User {
     id: number;
     username: string;

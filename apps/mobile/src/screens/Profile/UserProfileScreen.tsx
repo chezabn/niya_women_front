@@ -31,6 +31,10 @@ import {
     getUserPublications,
     likePublication,
     unlikePublication,
+    getFriendshipStatus,
+    sendFriendRequest,
+    deleteFriendship,
+    FriendshipStatus,
 } from "@niyya/api";
 
 import {
@@ -61,6 +65,7 @@ import {
 import {
     UserProfileHeader,
 } from "@/src/components/profile/UserProfileHeader";
+import { Button } from "@/src/components/ui/Button";
 
 
 export default function UserProfileScreen() {
@@ -74,6 +79,8 @@ export default function UserProfileScreen() {
         useAuthStore(
             (state) => state.accessToken,
         );
+
+    const currentUserId = useAuthStore((state) => state.user?.id);
 
     const [
         user,
@@ -100,6 +107,9 @@ export default function UserProfileScreen() {
         setLikingPublicationIds,
     ] = useState<number[]>([]);
 
+    const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>(null);
+    const [friendshipLoading, setFriendshipLoading] = useState(false);
+
 
     const numericUserId =
         Number(userId);
@@ -122,6 +132,7 @@ export default function UserProfileScreen() {
                     const [
                         userResponse,
                         publicationsResponse,
+                        friendshipResponse,
                     ] = await Promise.all([
                         getUser(
                             numericUserId,
@@ -132,6 +143,10 @@ export default function UserProfileScreen() {
                             numericUserId,
                             accessToken,
                         ),
+
+                        numericUserId === currentUserId
+                            ? Promise.resolve({ status: null as FriendshipStatus })
+                            : getFriendshipStatus(numericUserId, accessToken),
                     ]);
 
                     setUser(
@@ -141,6 +156,7 @@ export default function UserProfileScreen() {
                     setPosts(
                         publicationsResponse.results,
                     );
+                    setFriendshipStatus(friendshipResponse.status);
                 } catch (error) {
                     console.error(
                         "Erreur lors du chargement du profil utilisateur :",
@@ -153,8 +169,28 @@ export default function UserProfileScreen() {
             [
                 accessToken,
                 numericUserId,
+                currentUserId,
             ],
         );
+
+    const handleFriendshipPress = async () => {
+        if (!accessToken || !user || friendshipLoading) return;
+
+        setFriendshipLoading(true);
+        try {
+            if (friendshipStatus) {
+                await deleteFriendship(user.id, accessToken);
+                setFriendshipStatus(null);
+            } else {
+                const response = await sendFriendRequest(user.id, accessToken);
+                setFriendshipStatus(response.status);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la modification de l’amitié :", error);
+        } finally {
+            setFriendshipLoading(false);
+        }
+    };
 
 
     useFocusEffect(
@@ -353,7 +389,7 @@ export default function UserProfileScreen() {
                             styles.errorText
                         }
                     >
-                        Cette utilisatrice n'est
+                        Cette utilisatrice n&apos;est
                         plus disponible.
                     </Text>
                 </View>
@@ -460,6 +496,18 @@ export default function UserProfileScreen() {
                         </Text>
                     </View>
                 </View>
+
+                {user.id !== currentUserId && (
+                    <View style={styles.friendButton}>
+                        <Button
+                            text={friendshipStatus ? "Ajoutée" : "Ajouter"}
+                            onPress={handleFriendshipPress}
+                            isLoading={friendshipLoading}
+                            color={friendshipStatus ? colors.white : colors.primary}
+                            textColor={friendshipStatus ? colors.primary : colors.white}
+                        />
+                    </View>
+                )}
 
 
                 {/* Statistiques */}
@@ -580,7 +628,7 @@ export default function UserProfileScreen() {
                             }
                         >
                             Cette utilisatrice
-                            n'a pas encore publié
+                            n&apos;a pas encore publié
                             de contenu.
                         </Text>
                     </View>
@@ -623,6 +671,11 @@ const styles =
             alignItems: "center",
             marginBottom: 24,
             paddingHorizontal: 4,
+        },
+
+        friendButton: {
+            marginTop: -16,
+            marginBottom: 12,
         },
 
         avatar: {
