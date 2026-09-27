@@ -12,25 +12,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import { acceptFriendRequest, getFriendRequests, getFriends, removeFriendRequest } from "@niyya/api";
+import { getFollowers, getFollowing, unfollowUser } from "@niyya/api";
 import { UserPreview } from "@niyya/types";
 import { colors } from "@/src/theme";
 import { useAuthStore } from "@/src/store/authStore";
 
-type ListMode = "friends" | "requests";
+type ListMode = "followers" | "following";
 
 export function FriendsScreen() {
     const accessToken = useAuthStore((state) => state.accessToken);
-    const [mode, setMode] = useState<ListMode>("friends");
-    const [friends, setFriends] = useState<UserPreview[]>([]);
-    const [requests, setRequests] = useState<UserPreview[]>([]);
+    const currentUserId = useAuthStore((state) => state.user?.id);
+    const [mode, setMode] = useState<ListMode>("followers");
+    const [followers, setFollowers] = useState<UserPreview[]>([]);
+    const [following, setFollowing] = useState<UserPreview[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [busyUserId, setBusyUserId] = useState<number | null>(null);
     const [error, setError] = useState(false);
 
     const loadLists = useCallback(async (refresh = false) => {
-        if (!accessToken) {
+        if (!accessToken || !currentUserId) {
             setLoading(false);
             return;
         }
@@ -42,52 +43,47 @@ export function FriendsScreen() {
         }
         setError(false);
         try {
-            const [friendsResponse, requestsResponse] = await Promise.all([
-                getFriends(accessToken),
-                getFriendRequests(accessToken),
+            const [followersResponse, followingResponse] = await Promise.all([
+                getFollowers(currentUserId, accessToken),
+                getFollowing(currentUserId, accessToken),
             ]);
-            setFriends(friendsResponse.results);
-            setRequests(requestsResponse.results);
+            setFollowers(followersResponse.results);
+            setFollowing(followingResponse.results);
         } catch (loadError) {
-            console.error("Erreur lors du chargement des amies :", loadError);
+            console.error("Erreur lors du chargement des abonnements :", loadError);
             setError(true);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [accessToken]);
+    }, [accessToken, currentUserId]);
 
     useFocusEffect(useCallback(() => {
         void loadLists();
     }, [loadLists]));
 
-    const handleRequest = async (user: UserPreview, accept: boolean) => {
+    const handleRemove = async (user: UserPreview) => {
         if (!accessToken || busyUserId !== null) return;
         setBusyUserId(user.id);
         try {
-            if (accept) {
-                await acceptFriendRequest(user.id, accessToken);
-                setFriends((current) => [...current, user]);
-            } else {
-                await removeFriendRequest(user.id, accessToken);
-            }
-            setRequests((current) => current.filter((item) => item.id !== user.id));
+            await unfollowUser(user.id, accessToken);
+            setFollowing((current) => current.filter((item) => item.id !== user.id));
         } catch (actionError) {
-            console.error("Erreur lors du traitement de la demande :", actionError);
+            console.error("Erreur lors de la suppression de la relation :", actionError);
             setError(true);
         } finally {
             setBusyUserId(null);
         }
     };
 
-    const users = mode === "friends" ? friends : requests;
+    const users = mode === "followers" ? followers : following;
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <View>
-                    <Text style={styles.title}>Amies</Text>
-                    <Text style={styles.subtitle}>Retrouvez votre cercle Niyya</Text>
+                    <Text style={styles.title}>Abonnements</Text>
+                    <Text style={styles.subtitle}>Gérez vos followers et vos following</Text>
                 </View>
                 <Pressable style={styles.searchButton} onPress={() => router.push("/(tabs)/search")} accessibilityLabel="Rechercher des utilisatrices">
                     <Ionicons name="person-add-outline" size={21} color={colors.primary} />
@@ -95,11 +91,11 @@ export function FriendsScreen() {
             </View>
 
             <View style={styles.tabs}>
-                <Pressable style={[styles.tab, mode === "friends" && styles.activeTab]} onPress={() => setMode("friends")}>
-                    <Text style={[styles.tabText, mode === "friends" && styles.activeTabText]}>Mes amies ({friends.length})</Text>
+                <Pressable style={[styles.tab, mode === "followers" && styles.activeTab]} onPress={() => setMode("followers")}>
+                    <Text style={[styles.tabText, mode === "followers" && styles.activeTabText]}>Followers ({followers.length})</Text>
                 </Pressable>
-                <Pressable style={[styles.tab, mode === "requests" && styles.activeTab]} onPress={() => setMode("requests")}>
-                    <Text style={[styles.tabText, mode === "requests" && styles.activeTabText]}>Demandes ({requests.length})</Text>
+                <Pressable style={[styles.tab, mode === "following" && styles.activeTab]} onPress={() => setMode("following")}>
+                    <Text style={[styles.tabText, mode === "following" && styles.activeTabText]}>Following ({following.length})</Text>
                 </Pressable>
             </View>
 
@@ -127,24 +123,19 @@ export function FriendsScreen() {
                                 </View>
                                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
                             </Pressable>
-                            {mode === "requests" && (
-                                <View style={styles.actions}>
-                                    <Pressable style={styles.acceptButton} onPress={() => void handleRequest(item, true)} disabled={busyUserId !== null} accessibilityLabel={`Accepter la demande de ${item.username}`}>
-                                        {busyUserId === item.id ? <ActivityIndicator size="small" color={colors.white} /> : <Ionicons name="checkmark" size={19} color={colors.white} />}
-                                    </Pressable>
-                                    <Pressable style={styles.rejectButton} onPress={() => void handleRequest(item, false)} disabled={busyUserId !== null} accessibilityLabel={`Refuser la demande de ${item.username}`}>
-                                        <Ionicons name="close" size={19} color={colors.textSecondary} />
-                                    </Pressable>
-                                </View>
+                            {mode === "following" && (
+                                <Pressable style={styles.removeButton} onPress={() => void handleRemove(item)} disabled={busyUserId !== null} accessibilityLabel={`Ne plus suivre ${item.username}`}>
+                                    {busyUserId === item.id ? <ActivityIndicator size="small" color="#D32F2F" /> : <Ionicons name="close" size={20} color="#D32F2F" />}
+                                </Pressable>
                             )}
                         </View>
                     )}
                     ListEmptyComponent={(
                         <View style={styles.empty}>
-                            <Ionicons name={mode === "friends" ? "people-outline" : "person-add-outline"} size={42} color={colors.textSecondary} />
-                            <Text style={styles.emptyTitle}>{mode === "friends" ? "Votre cercle commence ici" : "Aucune demande en attente"}</Text>
-                            <Text style={styles.emptyText}>{mode === "friends" ? "Recherchez des utilisatrices et ajoutez-les à vos amies." : "Les nouvelles demandes d’amitié apparaîtront ici."}</Text>
-                            {mode === "friends" && <Pressable style={styles.findButton} onPress={() => router.push("/(tabs)/search")}><Text style={styles.findButtonText}>Trouver des amies</Text></Pressable>}
+                            <Ionicons name="people-outline" size={42} color={colors.textSecondary} />
+                            <Text style={styles.emptyTitle}>Aucun utilisateur ici pour le moment</Text>
+                            <Text style={styles.emptyText}>Recherchez des utilisatrices pour développer votre réseau.</Text>
+                            <Pressable style={styles.findButton} onPress={() => router.push("/(tabs)/search")}><Text style={styles.findButtonText}>Découvrir des profils</Text></Pressable>
                         </View>
                     )}
                 />
@@ -172,9 +163,7 @@ const styles = StyleSheet.create({
     userInfo: { flex: 1, marginLeft: 12 },
     username: { color: colors.black, fontSize: 15, fontWeight: "600" },
     fullName: { color: colors.textSecondary, fontSize: 13, marginTop: 3 },
-    actions: { flexDirection: "row", marginLeft: 8, gap: 8 },
-    acceptButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
-    rejectButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
+    removeButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.white, alignItems: "center", justifyContent: "center", marginLeft: 8 },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
     emptyList: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 32 },
     empty: { alignItems: "center", justifyContent: "center", paddingVertical: 48 },

@@ -3,60 +3,42 @@ import { apiFetch } from "./client";
 
 const FOLLOWER_API = "/followers";
 
-export type FriendshipStatus = "pending" | "accepted" | null;
-
-export function getFriendshipStatus(userId: number, accessToken: string) {
-    return apiFetch<{ status: FriendshipStatus }>(
-        `${FOLLOWER_API}/friends/${userId}/`,
+export function isFollowing(userId: number, accessToken: string) {
+    return apiFetch<{ is_following: boolean }>(
+        `${FOLLOWER_API}/follow/${userId}/`,
         undefined,
         accessToken,
     );
 }
 
-export function sendFriendRequest(userId: number, accessToken: string) {
-    return apiFetch<{ status: Exclude<FriendshipStatus, null> }>(
-        `${FOLLOWER_API}/friends/${userId}/`,
+export function followUser(userId: number, accessToken: string) {
+    return apiFetch<{ message: string }>(
+        `${FOLLOWER_API}/follow/${userId}/`,
         { method: "POST" },
         accessToken,
     );
 }
 
-export function deleteFriendship(userId: number, accessToken: string) {
+export function unfollowUser(userId: number, accessToken: string) {
     return apiFetch<void>(
-        `${FOLLOWER_API}/friends/${userId}/`,
+        `${FOLLOWER_API}/follow/${userId}/`,
         { method: "DELETE" },
         accessToken,
     );
 }
 
-export function getFriends(accessToken: string) {
+export function getFollowers(userId: number, accessToken: string) {
     return apiFetch<UserPreviewListResponse>(
-        `${FOLLOWER_API}/friends/`,
+        `${FOLLOWER_API}/followers/${userId}/`,
         undefined,
         accessToken,
     );
 }
 
-export function getFriendRequests(accessToken: string) {
+export function getFollowing(userId: number, accessToken: string) {
     return apiFetch<UserPreviewListResponse>(
-        `${FOLLOWER_API}/friend-requests/`,
+        `${FOLLOWER_API}/following/${userId}/`,
         undefined,
-        accessToken,
-    );
-}
-
-export function acceptFriendRequest(userId: number, accessToken: string) {
-    return apiFetch<{ status: "pending" | "accepted" }>(
-        `${FOLLOWER_API}/friends/${userId}/`,
-        { method: "PATCH" },
-        accessToken,
-    );
-}
-
-export function removeFriendRequest(userId: number, accessToken: string) {
-    return apiFetch<void>(
-        `${FOLLOWER_API}/friends/${userId}/`,
-        { method: "DELETE" },
         accessToken,
     );
 }
