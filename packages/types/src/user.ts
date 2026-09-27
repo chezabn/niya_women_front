@@ -66,3 +66,17 @@ export interface UserUpdate {
 export interface UserDelete {
     details: string;
 }
+
+export interface UserBlockedResponse {
+    blocked: boolean;
+}
+
+export interface UserReport {
+    user_id: number;
+    reason: string;
+}
+
+export interface UserReportResponse {
+    id: number;
+    detail: string;
+}

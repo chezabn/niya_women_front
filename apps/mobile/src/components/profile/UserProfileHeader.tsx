@@ -17,22 +17,22 @@ import {
 
 interface Props {
     username: string;
-    onBack: () => void;
+    onMenu: () => void;
 }
 
 export const UserProfileHeader = ({
                                       username,
-                                      onBack,
+                                      onMenu,
                                   }: Props) => {
     return (
         <View style={styles.container}>
             <Pressable
                 style={styles.backButton}
-                onPress={onBack}
+                onPress={onMenu}
                 hitSlop={8}
             >
                 <Ionicons
-                    name="arrow-back"
+                    name="menu"
                     size={26}
                     color={colors.black}
                 />

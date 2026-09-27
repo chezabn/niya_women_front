@@ -158,6 +158,11 @@ export const SettingsScreen = () => {
                     </Text>
 
                     <SettingsItem
+                        title="Utilisatrices bloquées"
+                        onPress={() => router.push("/profile/blocked")}
+                    />
+
+                    <SettingsItem
                         title="Notifications"
                         onPress={handleLogout}
                     />
