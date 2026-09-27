@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import { getFollowers, getFollowing, unfollowUser } from "@niyya/api";
+import { getFollowers, getFollowing, removeFollower, unfollowUser } from "@niyya/api";
 import { UserPreview } from "@niyya/types";
 import { colors } from "@/src/theme";
 import { useAuthStore } from "@/src/store/authStore";
@@ -64,10 +64,16 @@ export function FriendsScreen() {
 
     const handleRemove = async (user: UserPreview) => {
         if (!accessToken || busyUserId !== null) return;
+        const listMode = mode;
         setBusyUserId(user.id);
         try {
-            await unfollowUser(user.id, accessToken);
-            setFollowing((current) => current.filter((item) => item.id !== user.id));
+            if (listMode === "followers") {
+                await removeFollower(user.id, accessToken);
+                setFollowers((current) => current.filter((item) => item.id !== user.id));
+            } else {
+                await unfollowUser(user.id, accessToken);
+                setFollowing((current) => current.filter((item) => item.id !== user.id));
+            }
         } catch (actionError) {
             console.error("Erreur lors de la suppression de la relation :", actionError);
             setError(true);
@@ -123,11 +129,9 @@ export function FriendsScreen() {
                                 </View>
                                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
                             </Pressable>
-                            {mode === "following" && (
-                                <Pressable style={styles.removeButton} onPress={() => void handleRemove(item)} disabled={busyUserId !== null} accessibilityLabel={`Ne plus suivre ${item.username}`}>
+                            <Pressable style={styles.removeButton} onPress={() => void handleRemove(item)} disabled={busyUserId !== null} accessibilityLabel={mode === "followers" ? `Supprimer ${item.username} de vos followers` : `Ne plus suivre ${item.username}`}>
                                     {busyUserId === item.id ? <ActivityIndicator size="small" color="#D32F2F" /> : <Ionicons name="close" size={20} color="#D32F2F" />}
-                                </Pressable>
-                            )}
+                            </Pressable>
                         </View>
                     )}
                     ListEmptyComponent={(
