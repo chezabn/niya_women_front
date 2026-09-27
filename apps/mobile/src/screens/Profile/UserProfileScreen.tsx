@@ -31,10 +31,9 @@ import {
     getUserPublications,
     likePublication,
     unlikePublication,
-    getFriendshipStatus,
-    sendFriendRequest,
-    deleteFriendship,
-    FriendshipStatus,
+    isFollowing,
+    followUser,
+    unfollowUser,
 } from "@niyya/api";
 
 import {
@@ -107,8 +106,8 @@ export default function UserProfileScreen() {
         setLikingPublicationIds,
     ] = useState<number[]>([]);
 
-    const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>(null);
-    const [friendshipLoading, setFriendshipLoading] = useState(false);
+    const [isUserFollowed, setIsUserFollowed] = useState(false);
+    const [followLoading, setFollowLoading] = useState(false);
 
 
     const numericUserId =
@@ -132,7 +131,7 @@ export default function UserProfileScreen() {
                     const [
                         userResponse,
                         publicationsResponse,
-                        friendshipResponse,
+                        followResponse,
                     ] = await Promise.all([
                         getUser(
                             numericUserId,
@@ -145,8 +144,8 @@ export default function UserProfileScreen() {
                         ),
 
                         numericUserId === currentUserId
-                            ? Promise.resolve({ status: null as FriendshipStatus })
-                            : getFriendshipStatus(numericUserId, accessToken),
+                            ? Promise.resolve({ is_following: false })
+                            : isFollowing(numericUserId, accessToken),
                     ]);
 
                     setUser(
@@ -156,7 +155,7 @@ export default function UserProfileScreen() {
                     setPosts(
                         publicationsResponse.results,
                     );
-                    setFriendshipStatus(friendshipResponse.status);
+                    setIsUserFollowed(followResponse.is_following);
                 } catch (error) {
                     console.error(
                         "Erreur lors du chargement du profil utilisateur :",
@@ -173,22 +172,22 @@ export default function UserProfileScreen() {
             ],
         );
 
-    const handleFriendshipPress = async () => {
-        if (!accessToken || !user || friendshipLoading) return;
+    const handleFollowPress = async () => {
+        if (!accessToken || !user || followLoading) return;
 
-        setFriendshipLoading(true);
+        setFollowLoading(true);
         try {
-            if (friendshipStatus) {
-                await deleteFriendship(user.id, accessToken);
-                setFriendshipStatus(null);
+            if (isUserFollowed) {
+                await unfollowUser(user.id, accessToken);
+                setIsUserFollowed(false);
             } else {
-                const response = await sendFriendRequest(user.id, accessToken);
-                setFriendshipStatus(response.status);
+                await followUser(user.id, accessToken);
+                setIsUserFollowed(true);
             }
         } catch (error) {
-            console.error("Erreur lors de la modification de l’amitié :", error);
+            console.error("Erreur lors de la modification de l’abonnement :", error);
         } finally {
-            setFriendshipLoading(false);
+            setFollowLoading(false);
         }
     };
 
@@ -500,11 +499,11 @@ export default function UserProfileScreen() {
                 {user.id !== currentUserId && (
                     <View style={styles.friendButton}>
                         <Button
-                            text={friendshipStatus ? "Ajoutée" : "Ajouter"}
-                            onPress={handleFriendshipPress}
-                            isLoading={friendshipLoading}
-                            color={friendshipStatus ? colors.white : colors.primary}
-                            textColor={friendshipStatus ? colors.primary : colors.white}
+                            text={isUserFollowed ? "Suivi" : "Suivre"}
+                            onPress={handleFollowPress}
+                            isLoading={followLoading}
+                            color={isUserFollowed ? colors.white : colors.primary}
+                            textColor={isUserFollowed ? colors.primary : colors.white}
                         />
                     </View>
                 )}
