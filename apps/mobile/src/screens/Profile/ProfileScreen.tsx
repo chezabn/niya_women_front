@@ -385,8 +385,8 @@ export const ProfileScreen = () => {
                             user.profile
                                 .post_count
                         }
-                        followers={0}
-                        following={0}
+                        followers={user.followers_count}
+                        following={user.following_count}
                     />
                 </View>
 

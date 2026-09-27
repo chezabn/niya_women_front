@@ -1,6 +1,7 @@
 export interface UserProfile {
     bio: string;
     post_count: number;
+
 }
 
 
@@ -51,6 +52,8 @@ export interface User {
     is_superuser: boolean;
 
     profile: UserProfile;
+    followers_count: number;
+    following_count: number;
 }
 
 export interface UserUpdate {
