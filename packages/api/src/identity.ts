@@ -5,6 +5,7 @@ import {
     ReviewIdentityResponse,
     SubmitIdentityVerificationResponse,
     StatusIdentityVerification,
+    PaginatedIdentityReviews,
 } from "../../types";
 
 export const submitIdentityVerification = async (
@@ -67,6 +68,18 @@ export const getIdentityReview = (
         {
             method: "GET",
         },
+        accessToken,
+    );
+};
+
+export const getIdentityReviews = (
+    accessToken: string,
+    status: "pending" | "approved" | "rejected",
+    page = 1,
+) => {
+    return apiFetch<PaginatedIdentityReviews>(
+        `/identification/admin/identity/?status=${status}&page=${page}`,
+        { method: "GET" },
         accessToken,
     );
 };

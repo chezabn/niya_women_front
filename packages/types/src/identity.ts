@@ -53,3 +53,10 @@ export interface IdentityReviewResponse {
     created_at: string;
     updated_at: string;
 }
+
+export interface PaginatedIdentityReviews {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: IdentityReviewResponse[];
+}

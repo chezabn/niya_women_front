@@ -150,6 +150,14 @@ export const SettingsScreen = () => {
                         Compte
                     </Text>
 
+                    {user?.is_staff && (
+                        <SettingsItem
+                            title="Vérifications d'identité"
+                            subtitle="Examiner les demandes des utilisatrices"
+                            onPress={() => router.push("/admin-review")}
+                        />
+                    )}
+
                     <SettingsItem
                         title="Modifier mon profil"
                         onPress={() =>

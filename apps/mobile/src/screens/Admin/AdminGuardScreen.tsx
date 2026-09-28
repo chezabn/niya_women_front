@@ -3,12 +3,13 @@ import React from "react";
 import { LoginScreen } from "../Login/LoginScreen";
 import { AccessDeniedScreen } from "./AccessDeniedScreen";
 import { AdminReviewIdentityScreen } from "./AdminReviewIdentityScreen";
+import { AdminIdentityRequestsScreen } from "./AdminIdentityRequestsScreen";
 import {useAuthStore} from "@/src/store/authStore";
 
 
 
 interface Props {
-    verificationId: number;
+    verificationId?: number;
 }
 
 export const AdminGuardScreen = ({
@@ -32,6 +33,10 @@ export const AdminGuardScreen = ({
 
     if (!isAdmin) {
         return <AccessDeniedScreen />;
+    }
+
+    if (!verificationId) {
+        return <AdminIdentityRequestsScreen />;
     }
 
     return (
