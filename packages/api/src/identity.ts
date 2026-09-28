@@ -4,6 +4,7 @@ import {
     IdentityReviewResponse, ReviewIdentityRequest,
     ReviewIdentityResponse,
     SubmitIdentityVerificationResponse,
+    StatusIdentityVerification,
 } from "../../types";
 
 export const submitIdentityVerification = async (
@@ -40,6 +41,22 @@ export const submitIdentityVerification = async (
         accessToken,
     );
 };
+
+export const getStatusIdentityVerification = async (
+    accessToken: string,
+) => {
+    return apiFetch<StatusIdentityVerification>(
+        `/identification/identity/status/`,
+        {
+            method: "GET",
+        },
+        accessToken,
+    );
+}
+
+// ============================
+// ADMIN
+// ============================
 
 export const getIdentityReview = (
     pk: number,

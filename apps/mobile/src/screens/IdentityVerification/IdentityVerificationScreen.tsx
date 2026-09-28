@@ -127,26 +127,12 @@ export const IdentityVerificationScreen = () => {
             try {
                 setLoading(true);
 
-                const response =
-                    await submitIdentityVerification(
-                        idCard,
-                        selfie,
-                        accessToken,
-                    );
-
-                Alert.alert(
-                    "Demande envoyée",
-                    response.message,
-                    [
-                        {
-                            text: "Continuer",
-                            onPress: () =>
-                                router.replace(
-                                    "/(tabs)",
-                                ),
-                        },
-                    ],
+                await submitIdentityVerification(
+                    idCard,
+                    selfie,
+                    accessToken,
                 );
+                router.replace("/identity-pending");
             } catch (
                 error: any
                 ) {

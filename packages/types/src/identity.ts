@@ -3,6 +3,17 @@ export interface SubmitIdentityVerificationResponse {
     id: number;
 }
 
+export interface StatusIdentityVerification {
+    has_request: boolean;
+    status: string;
+    rejected_reason: string;
+    created_at: string;
+    updated_at: string;
+}
+
+// ============================
+// ADMIN
+// ============================
 export interface ReviewIdentityRequest {
     action: "approve" | "reject";
     rejection_reason?: string;

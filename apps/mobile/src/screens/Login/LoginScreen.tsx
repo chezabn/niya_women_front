@@ -10,7 +10,12 @@ import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { SocialButton } from "@/src/components/ui/SocialButton";
 import {colors} from "@/src/theme";
-import {login, getMe, reactivateAccount} from "@niyya/api";
+import {
+    login,
+    getMe,
+    getStatusIdentityVerification,
+    reactivateAccount,
+} from "@niyya/api";
 import {useAuthStore} from "@/src/store/authStore";
 import { AlertBanner } from "@/src/components/ui/AlertBanner";
 
@@ -49,7 +54,14 @@ export const LoginScreen = () => {
             }
 
             if (!user.identity_verified) {
-                router.replace("/identity-verification");
+                const identityStatus =
+                    await getStatusIdentityVerification(tokens.access);
+
+                router.replace(
+                    identityStatus.has_request
+                        ? "/identity-pending"
+                        : "/identity-verification",
+                );
                 return;
             }
 
