@@ -5,10 +5,10 @@ export interface SubmitIdentityVerificationResponse {
 
 export interface StatusIdentityVerification {
     has_request: boolean;
-    status: string;
-    rejected_reason: string;
-    created_at: string;
-    updated_at: string;
+    status: "PENDING" | "APPROVED" | "REJECTED" | "ERROR" | null;
+    rejection_reason?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 // ============================

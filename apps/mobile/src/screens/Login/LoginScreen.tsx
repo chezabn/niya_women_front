@@ -3,25 +3,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
     View,
     Text,
-    StyleSheet, Alert,
+    StyleSheet,
+    Alert,
+    Pressable,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import { SocialButton } from "@/src/components/ui/SocialButton";
-import {colors} from "@/src/theme";
+import { colors } from "@/src/theme";
 import {
     login,
     getMe,
     getStatusIdentityVerification,
     reactivateAccount,
 } from "@niyya/api";
-import {useAuthStore} from "@/src/store/authStore";
+import { useAuthStore } from "@/src/store/authStore";
 import { AlertBanner } from "@/src/components/ui/AlertBanner";
 
 export const LoginScreen = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
     const {
@@ -32,6 +35,7 @@ export const LoginScreen = () => {
     const handleLogin = async () => {
         try {
             setErrorMessage("");
+
             const tokens = await login({
                 username,
                 password,
@@ -57,11 +61,21 @@ export const LoginScreen = () => {
                 const identityStatus =
                     await getStatusIdentityVerification(tokens.access);
 
-                router.replace(
-                    identityStatus.has_request
-                        ? "/identity-pending"
-                        : "/identity-verification",
-                );
+                if (identityStatus.status === "REJECTED") {
+                    router.replace({
+                        pathname: "/identity-rejected",
+                        params: {
+                            reason: identityStatus.rejection_reason ?? "",
+                        },
+                    });
+                } else {
+                    router.replace(
+                        identityStatus.has_request
+                            ? "/identity-pending"
+                            : "/identity-verification",
+                    );
+                }
+
                 return;
             }
 
@@ -69,9 +83,8 @@ export const LoginScreen = () => {
 
         } catch (error: any) {
             console.error(error);
-            if (
-                error?.code === "ACCOUNT_DEACTIVATED"
-            ) {
+
+            if (error?.code === "ACCOUNT_DEACTIVATED") {
                 Alert.alert(
                     "Compte désactivé",
                     "Vous avez précédemment désactivé votre compte. Souhaitez-vous le réactiver ?",
@@ -95,6 +108,7 @@ export const LoginScreen = () => {
                                     );
                                 } catch (e) {
                                     console.error(e);
+
                                     setErrorMessage(
                                         "Impossible de réactiver votre compte.",
                                     );
@@ -103,8 +117,10 @@ export const LoginScreen = () => {
                         },
                     ],
                 );
+
                 return;
             }
+
             setErrorMessage(
                 error?.detail ||
                 "Une erreur est survenue lors de la connexion.",
@@ -135,19 +151,41 @@ export const LoginScreen = () => {
                     onChangeText={setUsername}
                 />
 
-                <Input
-                    placeholder="Mot de passe"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                />
+                <View style={styles.passwordContainer}>
+                    <Input
+                        placeholder="Mot de passe"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                    />
+
+                    <Pressable
+                        style={styles.passwordToggle}
+                        onPress={() =>
+                            setShowPassword((previous) => !previous)
+                        }
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                            showPassword
+                                ? "Masquer le mot de passe"
+                                : "Afficher le mot de passe"
+                        }
+                    >
+                        <Text style={styles.passwordToggleText}>
+                            {showPassword ? "Masquer" : "Afficher"}
+                        </Text>
+                    </Pressable>
+                </View>
 
                 <Button
                     text="Connexion"
                     onPress={handleLogin}
                 />
 
-                <Link href="/forgot-password" style={styles.link}>
+                <Link
+                    href="/forgot-password"
+                    style={styles.link}
+                >
                     Mot de passe oublié ?
                 </Link>
 
@@ -164,9 +202,13 @@ export const LoginScreen = () => {
                     platform="apple"
                     onPress={() => {}}
                 />
+
                 <Text style={styles.secondary}>
                     Vous n'avez pas de compte ?{" "}
-                    <Link href="/register" style={styles.link}>
+                    <Link
+                        href="/register"
+                        style={styles.link}
+                    >
                         Inscrivez-vous maintenant
                     </Link>
                 </Text>
@@ -201,11 +243,31 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
 
+    passwordContainer: {
+        position: "relative",
+    },
+
+    passwordToggle: {
+        position: "absolute",
+        right: 16,
+        top: 0,
+        bottom: 0,
+        justifyContent: "center",
+        zIndex: 1,
+    },
+
+    passwordToggleText: {
+        color: colors.primary,
+        fontSize: 14,
+        fontWeight: "600",
+    },
+
     secondary: {
         textAlign: "center",
         marginVertical: 16,
         color: colors.textSecondary,
     },
+
     link: {
         color: colors.primary,
         fontWeight: "600",
