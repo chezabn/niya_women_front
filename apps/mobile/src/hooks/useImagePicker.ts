@@ -27,14 +27,17 @@ export const useImagePicker = () => {
             await ImagePicker.requestCameraPermissionsAsync();
 
         if (!permission.granted) {
-            throw new Error("Permission caméra refusée");
+            throw new Error(
+                "Permission caméra refusée",
+            );
         }
 
-        const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ["images"],
-            quality: 0.8,
-            allowsEditing: true,
-        });
+        const result =
+            await ImagePicker.launchCameraAsync({
+                mediaTypes: ["images"],
+                quality: 0.5,
+                allowsEditing: false,
+            });
 
         if (result.canceled) {
             return null;
