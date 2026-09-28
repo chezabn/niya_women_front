@@ -24,11 +24,15 @@ import {
 import {colors} from "@/src/theme";
 import {SettingsItem} from "@/src/components/settings/SettingsItem";
 import {useAuthStore} from "@/src/store/authStore";
-import {deleteMe} from "@niyya/api";
+import {deleteMe, forgotPassword} from "@niyya/api";
 
 export const SettingsScreen = () => {
     const logout = useAuthStore(
         (state) => state.logout,
+    );
+
+    const user = useAuthStore(
+        (state) => state.user,
     );
 
     const accessToken = useAuthStore(
@@ -69,6 +73,27 @@ export const SettingsScreen = () => {
             logout();
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const handleChangePassword = async () => {
+        if (!user?.email) {
+            return;
+        }
+
+        try {
+            await forgotPassword({
+                email: user.email,
+            });
+
+            router.push(
+                "/reset-password",
+            );
+        } catch (error) {
+            console.error(
+                "Erreur lors de la demande de changement de mot de passe :",
+                error,
+            );
         }
     };
 
@@ -136,11 +161,7 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Changer mon mot de passe"
-                        onPress={() =>
-                            router.push(
-                                "/reset-password",
-                            )
-                        }
+                        onPress={handleChangePassword}
                     />
                     <SettingsItem
                         title="Mon activité"
