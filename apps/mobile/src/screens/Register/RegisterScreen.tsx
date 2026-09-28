@@ -44,6 +44,10 @@ import {
     useAuthStore,
 } from "@/src/store/authStore";
 
+import {
+    AlertBanner,
+} from "@/src/components/ui/AlertBanner";
+
 
 export const RegisterScreen = () => {
     const [
@@ -86,6 +90,8 @@ export const RegisterScreen = () => {
         setLoading,
     ] = useState(false);
 
+    const [errorMessage, setErrorMessage] = useState("");
+
 
     const setTokens =
         useAuthStore(
@@ -101,6 +107,7 @@ export const RegisterScreen = () => {
             }
 
             try {
+                setErrorMessage("");
                 setLoading(true);
 
                 const response =
@@ -125,11 +132,36 @@ export const RegisterScreen = () => {
                 router.replace(
                     "/verify-email",
                 );
-            } catch (error) {
+            } catch (error: any) {
                 console.error(
                     "Erreur lors de l'inscription :",
                     error,
                 );
+
+                const fieldLabels: Record<string, string> = {
+                    username: "Nom d'utilisateur",
+                    email: "Adresse email",
+                    first_name: "Prénom",
+                    last_name: "Nom",
+                    password: "Mot de passe",
+                    password2: "Confirmation du mot de passe",
+                    accept_cgu: "Conditions d'utilisation",
+                };
+
+                const detail = error?.detail;
+                if (typeof detail === "string") {
+                    setErrorMessage(detail);
+                } else if (detail && typeof detail === "object") {
+                    const messages = Object.entries(detail).flatMap(([field, value]) => {
+                        const fieldMessages = Array.isArray(value) ? value : [value];
+                        return fieldMessages
+                            .filter((message): message is string => typeof message === "string")
+                            .map((message) => `${fieldLabels[field] ?? field} : ${message}`);
+                    });
+                    setErrorMessage(messages.join("\n") || "Vérifiez les informations saisies et réessayez.");
+                } else {
+                    setErrorMessage(error?.message || "Une erreur est survenue lors de l'inscription.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -219,6 +251,12 @@ export const RegisterScreen = () => {
                         personnel.
                     </Text>
                 </View>
+
+                <AlertBanner
+                    type="error"
+                    visible={!!errorMessage}
+                    message={errorMessage}
+                />
 
 
                 {/* Informations personnelles */}

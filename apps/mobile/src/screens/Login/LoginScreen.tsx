@@ -84,6 +84,21 @@ export const LoginScreen = () => {
         } catch (error: any) {
             console.error(error);
 
+            if (error?.code === "ACCOUNT_LOCKED" || error?.status === 423) {
+                const lockedUntil = Date.parse(error?.detail?.locked_until ?? "");
+                const retryTime = Number.isNaN(lockedUntil)
+                    ? ""
+                    : ` Vous pourrez réessayer à ${new Date(lockedUntil).toLocaleTimeString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    })}.`;
+
+                setErrorMessage(
+                    `Votre compte est temporairement bloqué après plusieurs tentatives de connexion.${retryTime}`,
+                );
+                return;
+            }
+
             if (error?.code === "ACCOUNT_DEACTIVATED") {
                 Alert.alert(
                     "Compte désactivé",
@@ -121,10 +136,24 @@ export const LoginScreen = () => {
                 return;
             }
 
-            setErrorMessage(
-                error?.detail ||
-                "Une erreur est survenue lors de la connexion.",
-            );
+            const detail = error?.detail;
+            if (typeof detail === "string") {
+                setErrorMessage(detail);
+            } else if (detail && typeof detail === "object") {
+                const detailMessage = detail.message;
+                if (typeof detailMessage === "string") {
+                    setErrorMessage(detailMessage);
+                } else {
+                    const messages = Object.values(detail)
+                        .flatMap((value: unknown) => Array.isArray(value) ? value : [value])
+                        .filter((value: unknown): value is string => typeof value === "string");
+                    setErrorMessage(messages.join("\n") || "Une erreur est survenue lors de la connexion.");
+                }
+            } else {
+                setErrorMessage(
+                    error?.message || "Une erreur est survenue lors de la connexion.",
+                );
+            }
         }
     };
 
