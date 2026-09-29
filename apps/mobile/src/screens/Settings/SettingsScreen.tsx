@@ -151,11 +151,18 @@ export const SettingsScreen = () => {
                     </Text>
 
                     {user?.is_staff && (
-                        <SettingsItem
-                            title="Vérifications d'identité"
-                            subtitle="Examiner les demandes des utilisatrices"
-                            onPress={() => router.push("/admin-review")}
-                        />
+                        <>
+                            <SettingsItem
+                                title="Vérifications d'identité"
+                                subtitle="Examiner les demandes des utilisatrices"
+                                onPress={() => router.push("/admin-review")}
+                            />
+                            <SettingsItem
+                                title="Voir les Signalements"
+                                subtitle="Consulter les signalements reçus"
+                                onPress={() => router.push("/admin-reports")}
+                            />
+                        </>
                     )}
 
                     <SettingsItem

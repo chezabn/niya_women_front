@@ -71,6 +71,9 @@ export interface UserBlockedResponse {
     blocked: boolean;
 }
 
+// =======================================
+// Reporting
+// =======================================
 export interface UserReport {
     user_id: number;
     reason: string;
@@ -79,4 +82,20 @@ export interface UserReport {
 export interface UserReportResponse {
     id: number;
     detail: string;
+}
+
+export interface UserReportDetail {
+    id: number;
+    reporter: string;
+    reported: string;
+    reason: string;
+    created_at: string;
+}
+
+
+export interface UserReportListResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: UserReportDetail[];
 }

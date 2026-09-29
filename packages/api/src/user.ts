@@ -2,7 +2,7 @@ import {
     User,
     UserBlockedResponse,
     UserDelete,
-    UserPreviewListResponse, UserReport, UserReportResponse,
+    UserPreviewListResponse, UserReport, UserReportListResponse, UserReportResponse,
     UserSearchResponse,
     UserUpdate
 } from "../../types";
@@ -120,6 +120,18 @@ export const reportUser = (
         {
             method: "POST",
             body: JSON.stringify(data),
+        },
+        accessToken,
+    )
+}
+
+export const getAllReports = (
+    accessToken: string,
+) => {
+    return apiFetch<UserReportListResponse>(
+        "/users/reports/all/",
+        {
+            method: "GET",
         },
         accessToken,
     )
