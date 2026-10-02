@@ -49,17 +49,26 @@ export const reactivateAccount = (
     )
 }
 
-export const forgotPassword = (
+export const forgotPassword = async (
     payload: ForgotPasswordRequest,
 ) => {
-    return apiFetch<ForgotPasswordResponse>(
-        "/auth/request-password-reset/",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        }
-    )
-}
+    try {
+        const response = await apiFetch<ForgotPasswordResponse>(
+            "/auth/request-password-reset/",
+            {
+                method: "POST",
+                body: JSON.stringify(payload),
+            }
+        );
+
+        console.log("Response:", response);
+
+        return response;
+    } catch (error) {
+        console.log("Erreur API:", error);
+        throw error;
+    }
+};
 
 export const resetPassword = (
     payload: ResetPasswordRequest,
