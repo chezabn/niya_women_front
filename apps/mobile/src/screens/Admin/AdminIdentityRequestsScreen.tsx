@@ -8,6 +8,7 @@ import { getIdentityReviews } from "@niyya/api";
 import type { IdentityReviewResponse } from "@niyya/types";
 import { useAuthStore } from "@/src/store/authStore";
 import { colors } from "@/src/theme";
+import { PaginationButton } from "@/src/components/ui/PaginationButton";
 
 const filters = [
     { value: "pending", label: "En attente", color: "#A36D00", background: "#FFF2CC" },
@@ -121,11 +122,7 @@ export function AdminIdentityRequestsScreen() {
                         </Pressable>
                     );
                 })}
-                {!loading && nextPage !== null && (
-                    <Pressable style={styles.loadMoreButton} onPress={() => void loadRequests(nextPage)} disabled={loadingMore}>
-                        {loadingMore ? <ActivityIndicator color={colors.primary} /> : <Text style={styles.loadMoreText}>Charger plus de demandes</Text>}
-                    </Pressable>
-                )}
+                {!loading && nextPage !== null && <PaginationButton loading={loadingMore} onPress={() => void loadRequests(nextPage)} />}
             </ScrollView>
         </SafeAreaView>
     );
@@ -160,6 +157,4 @@ const styles = StyleSheet.create({
     emptyCard: { backgroundColor: colors.white, borderRadius: 18, padding: 27, alignItems: "center", marginTop: 4 },
     emptyIcon: { width: 58, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", marginBottom: 14 },
     emptyTitle: { color: colors.black, fontSize: 17, fontWeight: "700", marginBottom: 7 },
-    loadMoreButton: { minHeight: 46, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white, alignItems: "center", justifyContent: "center", marginTop: 3 },
-    loadMoreText: { color: colors.primary, fontSize: 13, fontWeight: "700" },
 });

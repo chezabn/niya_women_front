@@ -1,4 +1,4 @@
-import React, {useCallback, useState,} from "react";
+import React, {useCallback, useRef, useState,} from "react";
 
 import {
     ActivityIndicator,
@@ -122,6 +122,9 @@ export default function UserProfileScreen() {
         posts,
         setPosts,
     ] = useState<Publication[]>([]);
+    const [nextPostsPage, setNextPostsPage] = useState<number | null>(null);
+    const [loadingMorePosts, setLoadingMorePosts] = useState(false);
+    const loadingMorePostsRef = useRef(false);
 
     const [
         loading,
@@ -213,6 +216,7 @@ export default function UserProfileScreen() {
                         getUserPublications(
                             numericUserId,
                             accessToken,
+                            1,
                         ),
 
                         numericUserId === currentUserId
@@ -232,6 +236,7 @@ export default function UserProfileScreen() {
                     setPosts(
                         publicationsResponse.results,
                     );
+                    setNextPostsPage(publicationsResponse.next ? 2 : null);
 
                     setIsUserFollowed(
                         followResponse.is_following,
@@ -251,6 +256,22 @@ export default function UserProfileScreen() {
                 currentUserId,
             ],
         );
+
+    const loadMorePosts = useCallback(async () => {
+        if (!accessToken || !numericUserId || nextPostsPage === null || loadingMorePostsRef.current) return;
+        loadingMorePostsRef.current = true;
+        setLoadingMorePosts(true);
+        try {
+            const response = await getUserPublications(numericUserId, accessToken, nextPostsPage);
+            setPosts((current) => [...current, ...response.results]);
+            setNextPostsPage(response.next ? nextPostsPage + 1 : null);
+        } catch (error) {
+            console.error("Erreur lors du chargement des publications :", error);
+        } finally {
+            loadingMorePostsRef.current = false;
+            setLoadingMorePosts(false);
+        }
+    }, [accessToken, numericUserId, nextPostsPage]);
 
 
     /*
@@ -967,6 +988,9 @@ export default function UserProfileScreen() {
                         onLike={
                             handleLike
                         }
+                        hasMore={nextPostsPage !== null}
+                        loadingMore={loadingMorePosts}
+                        onLoadMore={loadMorePosts}
                     />
                 ) : (
                     <View

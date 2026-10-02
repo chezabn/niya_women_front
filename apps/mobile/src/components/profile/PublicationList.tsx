@@ -17,6 +17,7 @@ import {
 } from "@niyya/types";
 
 import { colors } from "@/src/theme";
+import { PaginationButton } from "@/src/components/ui/PaginationButton";
 
 
 interface Props {
@@ -29,6 +30,10 @@ interface Props {
     onLike: (
         publication: Publication,
     ) => void;
+
+    hasMore?: boolean;
+    loadingMore?: boolean;
+    onLoadMore?: () => void;
 }
 
 
@@ -36,6 +41,9 @@ export const PublicationList = ({
                                     posts,
                                     onPress,
                                     onLike,
+                                    hasMore = false,
+                                    loadingMore = false,
+                                    onLoadMore = () => {},
                                 }: Props) => {
     return (
         <FlatList
@@ -188,6 +196,7 @@ export const PublicationList = ({
                     </View>
                 </Pressable>
             )}
+            ListFooterComponent={hasMore ? <PaginationButton loading={loadingMore} onPress={onLoadMore} /> : null}
         />
     );
 };

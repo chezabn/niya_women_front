@@ -10,9 +10,10 @@ import { apiFetch } from "./client";
 
 export async function geAllPublications(
     accessToken: string,
+    page = 1,
 ): Promise<PublicationListResponse> {
     return apiFetch<PublicationListResponse>(
-        "/publications/publications/",
+        `/publications/publications/?page=${page}`,
         undefined,
         accessToken,
     );
@@ -20,9 +21,10 @@ export async function geAllPublications(
 
 export async function geAllPublicationsLiked(
     accessToken: string,
+    page = 1,
 ): Promise<PublicationListResponse> {
     return apiFetch<PublicationListResponse>(
-        "/publications/publications/liked/",
+        `/publications/publications/liked/?page=${page}`,
         undefined,
         accessToken,
     );
@@ -31,9 +33,10 @@ export async function geAllPublicationsLiked(
 export async function getUserPublications(
     userId: number,
     accessToken: string,
+    page = 1,
 ): Promise<PublicationListResponse> {
     return apiFetch<PublicationListResponse>(
-        `/publications/publications/user/${userId}/`,
+        `/publications/publications/user/${userId}/?page=${page}`,
         undefined,
         accessToken,
     );
@@ -42,9 +45,10 @@ export async function getUserPublications(
 
 export async function getMyPublications(
     accessToken: string,
+    page = 1,
 ): Promise<PublicationListResponse> {
     return apiFetch<PublicationListResponse>(
-        "/publications/publications/me/",
+        `/publications/publications/me/?page=${page}`,
         undefined,
         accessToken,
     );

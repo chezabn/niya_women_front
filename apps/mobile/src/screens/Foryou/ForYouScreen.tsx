@@ -1,7 +1,8 @@
-import React, {useCallback, useState,} from "react";
+import React, {useCallback, useRef, useState,} from "react";
 
 import {ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View,} from "react-native";
 import {PublicationCard} from "@/src/components/publication/PublicationCard";
+import {PaginationButton} from "@/src/components/ui/PaginationButton";
 import {SafeAreaView} from "react-native-safe-area-context";
 
 import {router} from "expo-router";
@@ -34,6 +35,10 @@ export const ForYouScreen = () => {
     const [refreshing, setRefreshing] =
         useState(false);
 
+    const [nextPage, setNextPage] = useState<number | null>(null);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const loadingMoreRef = useRef(false);
+
 
     /*
      * Chargement des publications
@@ -57,11 +62,13 @@ export const ForYouScreen = () => {
                 const response =
                     await geAllPublications(
                         accessToken,
+                        1,
                     );
 
                 setPublications(
                     response.results,
                 );
+                setNextPage(response.next ? 2 : null);
             } catch (error) {
                 console.error(
                     "Erreur lors du chargement des publications :",
@@ -77,6 +84,23 @@ export const ForYouScreen = () => {
         },
         [accessToken],
     );
+
+    const loadMorePublications = useCallback(async () => {
+        if (!accessToken || nextPage === null || loadingMoreRef.current) return;
+
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+        try {
+            const response = await geAllPublications(accessToken, nextPage);
+            setPublications((current) => [...current, ...response.results]);
+            setNextPage(response.next ? nextPage + 1 : null);
+        } catch (error) {
+            console.error("Erreur lors du chargement des publications :", error);
+        } finally {
+            loadingMoreRef.current = false;
+            setLoadingMore(false);
+        }
+    }, [accessToken, nextPage]);
 
 
     /*
@@ -292,6 +316,9 @@ export const ForYouScreen = () => {
                         styles.emptyList,
                 ]}
                 showsVerticalScrollIndicator={false}
+                ListFooterComponent={nextPage !== null ? (
+                    <PaginationButton loading={loadingMore} onPress={loadMorePublications} />
+                ) : null}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}

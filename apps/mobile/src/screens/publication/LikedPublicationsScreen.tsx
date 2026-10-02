@@ -1,5 +1,6 @@
 import React, {
     useCallback,
+    useRef,
     useState,
 } from "react";
 
@@ -34,6 +35,7 @@ import { colors } from "@/src/theme";
 import { useAuthStore } from "@/src/store/authStore";
 
 import { PublicationList } from "@/src/components/profile/PublicationList";
+import { PaginationButton } from "@/src/components/ui/PaginationButton";
 
 export const LikedPublicationsScreen = () => {
     const accessToken =
@@ -56,6 +58,9 @@ export const LikedPublicationsScreen = () => {
         refreshing,
         setRefreshing,
     ] = useState(false);
+    const [nextPage, setNextPage] = useState<number | null>(null);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const loadingMoreRef = useRef(false);
 
     const [
         likingPublicationIds,
@@ -82,11 +87,13 @@ export const LikedPublicationsScreen = () => {
                     const response =
                         await geAllPublicationsLiked(
                             accessToken,
+                            1,
                         );
 
                     setPublications(
                         response.results,
                     );
+                    setNextPage(response.next ? 2 : null);
                 } catch (error) {
                     console.error(
                         "Erreur lors du chargement des publications aimées :",
@@ -104,6 +111,22 @@ export const LikedPublicationsScreen = () => {
             },
             [accessToken],
         );
+
+    const loadMore = useCallback(async () => {
+        if (!accessToken || nextPage === null || loadingMoreRef.current) return;
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+        try {
+            const response = await geAllPublicationsLiked(accessToken, nextPage);
+            setPublications((current) => [...current, ...response.results]);
+            setNextPage(response.next ? nextPage + 1 : null);
+        } catch (error) {
+            console.error("Erreur lors du chargement des publications aimées :", error);
+        } finally {
+            loadingMoreRef.current = false;
+            setLoadingMore(false);
+        }
+    }, [accessToken, nextPage]);
 
     useFocusEffect(
         useCallback(() => {
@@ -399,6 +422,7 @@ export const LikedPublicationsScreen = () => {
                             }
                         />
                     )}
+                    ListFooterComponent={nextPage !== null ? <PaginationButton loading={loadingMore} onPress={loadMore} /> : null}
                     showsVerticalScrollIndicator={
                         false
                     }

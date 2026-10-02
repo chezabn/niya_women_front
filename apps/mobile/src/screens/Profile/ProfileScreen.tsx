@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import {
     ActivityIndicator,
@@ -60,6 +60,9 @@ export const ProfileScreen = () => {
     const [loading, setLoading] = useState(true);
 
     const [posts, setPosts] = useState<Publication[]>([]);
+    const [nextPostsPage, setNextPostsPage] = useState<number | null>(null);
+    const [loadingMorePosts, setLoadingMorePosts] = useState(false);
+    const loadingMorePostsRef = useRef(false);
 
     const [
         likingPublicationIds,
@@ -216,9 +219,11 @@ export const ProfileScreen = () => {
                 const response =
                     await getMyPublications(
                         accessToken,
+                        1,
                     );
 
                 setPosts(response.results);
+                setNextPostsPage(response.next ? 2 : null);
             } catch (error) {
                 console.error(
                     "Erreur lors du chargement des publications :",
@@ -228,6 +233,23 @@ export const ProfileScreen = () => {
         },
         [accessToken],
     );
+
+    const loadMorePosts = useCallback(async () => {
+        if (!accessToken || nextPostsPage === null || loadingMorePostsRef.current) return;
+
+        loadingMorePostsRef.current = true;
+        setLoadingMorePosts(true);
+        try {
+            const response = await getMyPublications(accessToken, nextPostsPage);
+            setPosts((current) => [...current, ...response.results]);
+            setNextPostsPage(response.next ? nextPostsPage + 1 : null);
+        } catch (error) {
+            console.error("Erreur lors du chargement des publications :", error);
+        } finally {
+            loadingMorePostsRef.current = false;
+            setLoadingMorePosts(false);
+        }
+    }, [accessToken, nextPostsPage]);
 
     const loadProfileData = useCallback(
         async () => {
@@ -434,6 +456,9 @@ export const ProfileScreen = () => {
                                 handlePublicationPress
                             }
                             onLike={handleLike}
+                            hasMore={nextPostsPage !== null}
+                            loadingMore={loadingMorePosts}
+                            onLoadMore={loadMorePosts}
                         />
                     )}
 
