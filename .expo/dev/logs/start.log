@@ -1,0 +1,13 @@
+{"_e":"root:init","_t":1790858415102,"format":"v0-jsonl","version":"57.0.27"}
+{"_e":"env:mode","_t":1790858415102,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1790858415105,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"http://localhost:8000/api","EXPO_PUBLIC_CLOUDFLARE_S3_ENDPOINT_URL":"https://38a28a3dd2053cc80622501ec977cc10.eu.r2.cloudflarestorage.com"}}
+{"_e":"devserver:start","_t":1790858415264,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1790858415504,"serverRoot":"../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1790858415601,"plugins":[]}
+{"_e":"root:init","_t":1790858619669,"format":"v0-jsonl","version":"57.0.27"}
+{"_e":"env:mode","_t":1790858619670,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1790858619671,"mode":"development","files":["../../../.env"],"env":{"EXPO_PUBLIC_API_URL":"http://localhost:8000/api","EXPO_PUBLIC_CLOUDFLARE_S3_ENDPOINT_URL":"https://38a28a3dd2053cc80622501ec977cc10.eu.r2.cloudflarestorage.com"}}
+{"_e":"devserver:start","_t":1790858619782,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1790858619938,"serverRoot":"../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1790858619993,"plugins":[]}
+{"_e":"metro:instantiate","_t":1790858631484,"atlas":false,"workers":6,"host":"::","port":8081}
