@@ -7,6 +7,7 @@ import {
 } from "react-native-safe-area-context";
 
 import {
+    Linking,
     ScrollView,
     StyleSheet,
     Switch,
@@ -571,14 +572,19 @@ export const RegisterScreen = () => {
                             J'accepte les CGU
                         </Text>
 
-                        <Text
-                            style={
-                                styles.cguText
-                            }
-                        >
-                            En créant votre compte,
-                            vous acceptez les conditions
-                            d'utilisation de Niyya.
+                        <Text style={styles.cguText}>
+                            En créant votre compte, vous acceptez les{" "}
+                            <Text
+                                style={styles.cguLink}
+                                onPress={() =>
+                                    Linking.openURL(
+                                        "https://www.niyya-women.com/cgu.html",
+                                    )
+                                }
+                            >
+                                conditions d'utilisation
+                            </Text>
+                            {" "}de Niyya.
                         </Text>
                     </View>
                 </TouchableOpacity>
@@ -876,6 +882,12 @@ const styles =
             fontSize: 11,
             lineHeight: 16,
             color: colors.textSecondary,
+        },
+
+        cguLink: {
+            color: colors.primary,
+            textDecorationLine: "underline",
+            fontWeight: "600",
         },
 
         /*
