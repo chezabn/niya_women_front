@@ -1,7 +1,7 @@
 import React from "react";
 
 import {
-    Alert,
+    Alert, Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -118,6 +118,26 @@ export const SettingsScreen = () => {
         );
     };
 
+    const handlePrivacy = async () => {
+        await Linking.openURL("https://www.niyya-women.com/confidentialite.html");
+    }
+
+    const handleReportProblems = async () => {
+        await Linking.openURL("https://www.niyya-women.com/signaler-un-probleme.html");
+    }
+
+    const handleFAQ = async () => {
+        await Linking.openURL("https://www.niyya-women.com/faq.html");
+    }
+
+    const handleCGU = async () => {
+        await Linking.openURL("https://www.niyya-women.com/cgu.html");
+    }
+
+    const handleAbout = async () => {
+        await Linking.openURL("https://www.niyya-women.com/a-propos.html");
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
@@ -147,7 +167,7 @@ export const SettingsScreen = () => {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
-                        Compte
+                        Admin
                     </Text>
 
                     {user?.is_staff && (
@@ -164,6 +184,12 @@ export const SettingsScreen = () => {
                             />
                         </>
                     )}
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>
+                        Compte
+                    </Text>
 
                     <SettingsItem
                         title="Modifier mon profil"
@@ -199,23 +225,8 @@ export const SettingsScreen = () => {
                     />
 
                     <SettingsItem
-                        title="Notifications"
-                        onPress={handleLogout}
-                    />
-
-                    <SettingsItem
-                        title="Vérification d'identité"
-                        onPress={handleLogout} // TODO A changer
-                    />
-
-                    <SettingsItem
                         title="Confidentialité"
-                        onPress={handleLogout}
-                    />
-
-                    <SettingsItem
-                        title="Mes données"
-                        onPress={handleLogout}
+                        onPress={handlePrivacy}
                     />
                 </View>
 
@@ -226,12 +237,12 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Signaler un problème"
-                        onPress={handleLogout}
+                        onPress={handleReportProblems}
                     />
 
                     <SettingsItem
                         title="Centre d'aide"
-                        onPress={handleLogout}
+                        onPress={handleFAQ}
                     />
                 </View>
 
@@ -242,17 +253,17 @@ export const SettingsScreen = () => {
 
                     <SettingsItem
                         title="Politique de confidentalité"
-                        onPress={handleLogout}
+                        onPress={handlePrivacy}
                     />
 
                     <SettingsItem
                         title="Conditions d'utilisation"
-                        onPress={handleLogout}
+                        onPress={handleCGU}
                     />
 
                     <SettingsItem
                         title="À propos"
-                        onPress={handleLogout}
+                        onPress={handleAbout}
                     />
                 </View>
 
