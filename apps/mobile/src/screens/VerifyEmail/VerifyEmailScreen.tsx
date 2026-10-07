@@ -246,7 +246,7 @@ export const VerifyEmailScreen = () => {
                                 styles.backButton
                             }
                             onPress={() =>
-                                router.back()
+                                router.replace("/login")
                             }
                             activeOpacity={0.7}
                             hitSlop={8}
