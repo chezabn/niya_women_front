@@ -8,8 +8,11 @@
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.niyyawomen.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.niyyawomen.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.niyyawomen.app",
