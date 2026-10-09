@@ -33,3 +33,15 @@ export interface PublicationCreate {
     caption: string;
     comments_enabled: boolean;
 }
+
+// ==================================
+// Report
+// ==================================
+export interface PublicationReport {
+    reason: string;
+}
+
+export interface PublicationReportResponse {
+    id: number;
+    detail: string;
+}

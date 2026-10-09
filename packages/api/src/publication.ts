@@ -1,7 +1,7 @@
 import {
     Publication,
     PublicationCreate,
-    PublicationListResponse,
+    PublicationListResponse, PublicationReport, PublicationReportResponse,
     PublicationUpdate,
 } from "../../types";
 
@@ -137,4 +137,22 @@ export async function unlikePublication(
         },
         accessToken,
     );
+}
+
+// ==================================
+// Report
+// ==================================
+export async function reportPublication(
+    publicationId: number,
+    reason: PublicationReport,
+    accessToken: string,
+): Promise<PublicationReportResponse> {
+    return apiFetch<PublicationReportResponse>(
+        `/publications/publications/${publicationId}/report/`,
+        {
+            method: "POST",
+            body: JSON.stringify(reason),
+        },
+        accessToken,
+    )
 }

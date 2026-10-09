@@ -6,10 +6,13 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
+    Modal,
     Pressable,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
+    TouchableOpacity,
     View,
 } from "react-native";
 
@@ -33,11 +36,29 @@ import {
     deletePublication,
     likePublication,
     unlikePublication,
+    reportPublication,
 } from "@niyya/api";
 
 import { useAuthStore } from "@/src/store/authStore";
 
 import { CommentList } from "@/src/components/publication/CommentList";
+import type { PublicationReport } from "@niyya/types";
+
+type ReportReason = {
+    id: string;
+    title: string;
+    description: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    backgroundColor: string;
+};
+
+const REPORT_REASONS: ReportReason[] = [
+    { id: "sexual", title: "Propos ou contenu sexuel", description: "Contenu sexuel, suggestif ou inapproprié.", icon: "heart-dislike-outline", color: "#C65D57", backgroundColor: "#F9EDEC" },
+    { id: "harassment", title: "Harcèlement ou intimidation", description: "Comportement agressif, intimidant ou répétitif.", icon: "warning-outline", color: "#B27A2B", backgroundColor: "#FAF3E5" },
+    { id: "spam", title: "Spam ou comportement abusif", description: "Publications répétitives, publicité abusive ou comportement dérangeant.", icon: "megaphone-outline", color: "#8A6BAF", backgroundColor: "#F3EFF8" },
+    { id: "other", title: "Autre problème", description: "Le motif de votre signalement ne correspond pas aux choix proposés.", icon: "flag-outline", color: colors.primary, backgroundColor: "#F1ECF8" },
+];
 
 const getPublicationById = async (
     id: string,
@@ -93,6 +114,42 @@ export const PublicationDetailScreen = () => {
         liking,
         setLiking,
     ] = useState(false);
+    const [menuVisible, setMenuVisible] = useState(false);
+    const [reportVisible, setReportVisible] = useState(false);
+    const [selectedReportReason, setSelectedReportReason] = useState<ReportReason | null>(null);
+    const [otherReason, setOtherReason] = useState("");
+    const [reporting, setReporting] = useState(false);
+
+    const openReport = () => {
+        setMenuVisible(false);
+        setSelectedReportReason(null);
+        setOtherReason("");
+        setReportVisible(true);
+    };
+
+    const closeReport = () => {
+        if (reporting) return;
+        setReportVisible(false);
+        setSelectedReportReason(null);
+        setOtherReason("");
+    };
+
+    const submitReport = async () => {
+        if (!publication || !accessToken || !selectedReportReason || reporting) return;
+        const reason = selectedReportReason.id === "other" ? otherReason.trim() : selectedReportReason.title;
+        if (!reason) return;
+        try {
+            setReporting(true);
+            const response = await reportPublication(publication.id, { reason } satisfies PublicationReport, accessToken);
+            setReportVisible(false);
+            Alert.alert("Signalement envoyé", response.detail || "Votre signalement a bien été transmis. Merci de contribuer à la sécurité de la communauté.");
+        } catch (error) {
+            console.error("Erreur lors du signalement de la publication :", error);
+            Alert.alert("Impossible d'envoyer le signalement", "Une erreur est survenue pendant l'envoi. Vérifiez votre connexion et réessayez.");
+        } finally {
+            setReporting(false);
+        }
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -408,11 +465,9 @@ export const PublicationDetailScreen = () => {
                         />
                     </Pressable>
                 ) : (
-                    <View
-                        style={
-                            styles.headerButton
-                        }
-                    />
+                    <Pressable style={styles.headerButton} onPress={() => setMenuVisible(true)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Options de la publication">
+                        <Ionicons name="menu" size={25} color={colors.black} />
+                    </Pressable>
                 )}
             </View>
 
@@ -689,6 +744,52 @@ export const PublicationDetailScreen = () => {
                     />
                 </View>
             )}
+
+            <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+                <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)}>
+                    <View style={styles.menuCard}>
+                        <TouchableOpacity style={styles.menuOption} onPress={openReport}>
+                            <Ionicons name="flag-outline" size={19} color="#D9534F" />
+                            <Text style={styles.menuOptionText}>Signaler la publication</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Pressable>
+            </Modal>
+
+            <Modal visible={reportVisible} transparent animationType="slide" onRequestClose={closeReport}>
+                <View style={styles.reportOverlay}>
+                    <View style={styles.reportCard}>
+                        <View style={styles.reportHeader}>
+                            <View style={styles.reportIcon}><Ionicons name="flag-outline" size={22} color={colors.primary} /></View>
+                            <TouchableOpacity onPress={closeReport} disabled={reporting} style={styles.closeButton}><Ionicons name="close" size={22} color={colors.textSecondary} /></TouchableOpacity>
+                        </View>
+                        <Text style={styles.reportTitle}>Signaler la publication</Text>
+                        <Text style={styles.reportSubtitle}>Choisissez le motif qui correspond le mieux à la situation.</Text>
+                        <ScrollView style={styles.reasonsList} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                            {REPORT_REASONS.map((reason) => {
+                                const selected = selectedReportReason?.id === reason.id;
+                                return <TouchableOpacity key={reason.id} style={[styles.reason, selected && styles.reasonSelected]} onPress={() => setSelectedReportReason(reason)} activeOpacity={0.75}>
+                                    <View style={[styles.reasonIcon, { backgroundColor: reason.backgroundColor }]}><Ionicons name={reason.icon} size={20} color={reason.color} /></View>
+                                    <View style={styles.reasonContent}><Text style={styles.reasonTitle}>{reason.title}</Text><Text style={styles.reasonDescription}>{reason.description}</Text></View>
+                                    <View style={[styles.radio, selected && styles.radioSelected]}>{selected && <View style={styles.radioDot} />}</View>
+                                </TouchableOpacity>;
+                            })}
+                            {selectedReportReason?.id === "other" && <View style={styles.otherReasonContainer}>
+                                <Text style={styles.otherReasonLabel}>Expliquez-nous ce qui s'est passé</Text>
+                                <TextInput value={otherReason} onChangeText={setOtherReason} placeholder="Décrivez le problème..." placeholderTextColor={colors.textMuted} multiline maxLength={2000} style={styles.reasonInput} textAlignVertical="top" editable={!reporting} />
+                                <Text style={styles.characterCount}>{otherReason.length}/2000</Text>
+                            </View>}
+                        </ScrollView>
+                        <View style={styles.reportInfo}><Ionicons name="shield-checkmark-outline" size={17} color={colors.primary} /><Text style={styles.reportInfoText}>Les signalements sont examinés avec attention par notre équipe.</Text></View>
+                        <View style={styles.reportButtons}>
+                            <TouchableOpacity style={styles.reportCancel} onPress={closeReport} disabled={reporting}><Text style={styles.reportCancelText}>Annuler</Text></TouchableOpacity>
+                            <TouchableOpacity style={[styles.reportSubmit, (!selectedReportReason || (selectedReportReason.id === "other" && !otherReason.trim()) || reporting) && styles.reportSubmitDisabled]} onPress={submitReport} disabled={!selectedReportReason || (selectedReportReason.id === "other" && !otherReason.trim()) || reporting}>
+                                {reporting ? <ActivityIndicator size="small" color={colors.white} /> : <><Ionicons name="paper-plane-outline" size={17} color={colors.white} /><Text style={styles.reportSubmitText}>Envoyer le signalement</Text></>}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -951,4 +1052,37 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: colors.primary,
     },
+    menuOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)", justifyContent: "flex-start", alignItems: "flex-end", paddingTop: 54, paddingHorizontal: 16 },
+    menuCard: { backgroundColor: colors.white, borderRadius: 12, padding: 6, minWidth: 225, elevation: 5 },
+    menuOption: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 14, gap: 10 },
+    menuOptionText: { color: colors.black, fontSize: 15, fontWeight: "600" },
+    reportOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+    reportCard: { backgroundColor: colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 22, paddingTop: 22, paddingBottom: 30, maxHeight: "90%" },
+    reportHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
+    reportIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#F1ECF8", alignItems: "center", justifyContent: "center" },
+    closeButton: { padding: 8 },
+    reportTitle: { fontSize: 21, fontWeight: "700", color: colors.black },
+    reportSubtitle: { color: colors.textSecondary, fontSize: 14, lineHeight: 20, marginTop: 8, marginBottom: 14 },
+    reasonsList: { flexShrink: 1 },
+    reason: { flexDirection: "row", alignItems: "center", padding: 12, marginBottom: 8, borderRadius: 14, borderWidth: 1, borderColor: "#ECECEC" },
+    reasonSelected: { borderColor: colors.primary, backgroundColor: "#FBF9FD" },
+    reasonIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", marginRight: 11 },
+    reasonContent: { flex: 1 },
+    reasonTitle: { color: colors.black, fontWeight: "600", fontSize: 14 },
+    reasonDescription: { color: colors.textSecondary, fontSize: 12, lineHeight: 17, marginTop: 3 },
+    radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: "#C8C8C8", alignItems: "center", justifyContent: "center", marginLeft: 8 },
+    radioSelected: { borderColor: colors.primary },
+    radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
+    otherReasonContainer: { padding: 12, backgroundColor: "#FAFAFA", borderRadius: 12, marginBottom: 10 },
+    otherReasonLabel: { fontSize: 14, fontWeight: "600", color: colors.black, marginBottom: 8 },
+    reasonInput: { minHeight: 90, borderWidth: 1, borderColor: "#E5E5E5", borderRadius: 10, padding: 10, color: colors.black },
+    characterCount: { textAlign: "right", color: colors.textSecondary, fontSize: 12, marginTop: 5 },
+    reportInfo: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 14 },
+    reportInfoText: { flex: 1, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
+    reportButtons: { flexDirection: "row", gap: 10 },
+    reportCancel: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 14, borderRadius: 12, backgroundColor: "#F2F2F2" },
+    reportCancelText: { color: colors.black, fontWeight: "600" },
+    reportSubmit: { flex: 1.6, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 12, backgroundColor: colors.primary },
+    reportSubmitDisabled: { opacity: 0.5 },
+    reportSubmitText: { color: colors.white, fontSize: 13, fontWeight: "700" },
 });
