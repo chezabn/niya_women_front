@@ -105,8 +105,19 @@ export function AdminIdentityRequestsScreen() {
                 ) : requests.map((item) => {
                     const name = [item.user.first_name, item.user.last_name].filter(Boolean).join(" ") || item.user.username;
                     const itemStatus = filters.find((filter) => filter.value === item.status.toLowerCase());
+                    const canReview = item.status.toLowerCase() === "pending";
                     return (
-                        <Pressable key={item.id} style={styles.requestCard} onPress={() => router.push(`/admin/review/${item.id}`)}>
+                        <Pressable
+                            key={item.id}
+                            style={[styles.requestCard, !canReview && styles.reviewedRequestCard]}
+                            onPress={() => {
+                                if (canReview) router.push(`/admin/review/${item.id}`);
+                            }}
+                            disabled={!canReview}
+                            accessibilityRole="button"
+                            accessibilityState={{ disabled: !canReview }}
+                            accessibilityLabel={`${name}, statut ${itemStatus?.label ?? item.status}${canReview ? ", ouvrir la demande" : ", demande déjà traitée"}`}
+                        >
                             <View style={styles.avatar}><Text style={styles.avatarText}>{name.slice(0, 1).toUpperCase()}</Text></View>
                             <View style={styles.requestCopy}>
                                 <Text style={styles.requestName}>{name}</Text>
@@ -117,7 +128,7 @@ export function AdminIdentityRequestsScreen() {
                                 <View style={[styles.statusBadge, { backgroundColor: itemStatus?.background ?? "#F1F1F1" }]}>
                                     <Text style={[styles.statusText, { color: itemStatus?.color ?? colors.textSecondary }]}>{itemStatus?.label ?? item.status}</Text>
                                 </View>
-                                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                                {canReview && <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />}
                             </View>
                         </Pressable>
                     );
@@ -143,6 +154,7 @@ const styles = StyleSheet.create({
     filterButton: { flex: 1, minHeight: 42, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white, alignItems: "center", justifyContent: "center", paddingHorizontal: 5 },
     filterText: { color: colors.textSecondary, fontSize: 12, fontWeight: "600" },
     requestCard: { flexDirection: "row", alignItems: "center", backgroundColor: colors.white, borderRadius: 16, padding: 14, marginBottom: 11, borderWidth: 1, borderColor: "#F0ECE4" },
+    reviewedRequestCard: { opacity: 0.8 },
     avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: "#F5EBD2", alignItems: "center", justifyContent: "center", marginRight: 12 },
     avatarText: { color: colors.primary, fontSize: 18, fontWeight: "700" },
     requestCopy: { flex: 1 },

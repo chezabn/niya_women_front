@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getIdentityReview, reviewIdentity } from "@niyya/api";
@@ -19,18 +19,28 @@ export const AdminReviewIdentityScreen = ({ verificationId }: Props) => {
     const [rejectionReason, setRejectionReason] = useState("");
 
     useEffect(() => {
+        let active = true;
         const load = async () => {
             if (!accessToken) return;
             try {
-                setVerification(await getIdentityReview(verificationId, accessToken));
+                const request = await getIdentityReview(verificationId, accessToken);
+                if (!active) return;
+                if (request.status.toLowerCase() !== "pending") {
+                    Alert.alert("Demande déjà traitée", "Cette demande a déjà été approuvée ou refusée.");
+                    router.replace("/admin-review");
+                    return;
+                }
+                setVerification(request);
             } catch (error) {
+                if (!active) return;
                 console.error(error);
                 Alert.alert("Erreur", "Impossible de charger cette demande.");
             } finally {
-                setLoading(false);
+                if (active) setLoading(false);
             }
         };
         void load();
+        return () => { active = false; };
     }, [accessToken, verificationId]);
 
     const submitReview = async (action: "approve" | "reject") => {
@@ -71,7 +81,15 @@ export const AdminReviewIdentityScreen = ({ verificationId }: Props) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            <KeyboardAvoidingView
+                style={styles.keyboard}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+            <ScrollView
+                contentContainerStyle={styles.content}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+            >
                 <View style={styles.header}>
                     <Pressable onPress={() => router.back()} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Retour">
                         <Ionicons name="arrow-back" size={23} color={colors.black} />
@@ -115,6 +133,7 @@ export const AdminReviewIdentityScreen = ({ verificationId }: Props) => {
                         multiline
                         textAlignVertical="top"
                         style={styles.reasonInput}
+                        returnKeyType="default"
                     />
                     <Pressable disabled={submitting} style={[styles.approveButton, submitting && styles.disabled]} onPress={() => void submitReview("approve")}>
                         <Ionicons name="checkmark-circle-outline" size={20} color={colors.white} />
@@ -126,12 +145,14 @@ export const AdminReviewIdentityScreen = ({ verificationId }: Props) => {
                     </Pressable>
                 </View>
             </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
+    keyboard: { flex: 1 },
     content: { padding: 20, paddingBottom: 36 },
     header: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20 },
     backButton: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
