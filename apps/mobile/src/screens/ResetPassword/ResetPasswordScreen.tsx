@@ -67,6 +67,7 @@ export const ResetPasswordScreen = () => {
                 code: code,
                 new_password: newPassword,
             });
+            router.replace("/login");
         } catch (error) {
             console.log(error);
         }
