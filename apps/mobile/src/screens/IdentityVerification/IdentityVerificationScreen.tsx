@@ -30,6 +30,8 @@ import {
     submitIdentityVerification,
 } from "@niyya/api";
 
+import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+
 import {
     useAuthStore,
 } from "@/src/store/authStore";
@@ -45,6 +47,52 @@ import {
 import {
     useImagePicker,
 } from "@/src/hooks/useImagePicker";
+
+const MAX_IMAGE_SIZE = 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 2048;
+
+const compressIdentityPhoto = async (
+    uri: string,
+    width: number,
+    height: number,
+): Promise<string> => {
+    let scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(width, height));
+    let quality = 0.85;
+
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+        const result = await manipulateAsync(
+            uri,
+            [{
+                resize: {
+                    width: Math.max(1, Math.round(width * scale)),
+                    height: Math.max(1, Math.round(height * scale)),
+                },
+            }],
+            {
+                compress: quality,
+                format: SaveFormat.JPEG,
+                base64: true,
+            },
+        );
+
+        const base64 = result.base64 ?? "";
+        const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
+        const sizeInBytes = Math.floor((base64.length * 3) / 4) - padding;
+
+        if (sizeInBytes <= MAX_IMAGE_SIZE) {
+            return result.uri;
+        }
+
+        if (quality > 0.35) {
+            quality = Math.max(0.35, quality - 0.1);
+        } else {
+            scale *= 0.85;
+            quality = 0.75;
+        }
+    }
+
+    throw new Error("La photo est trop volumineuse pour être compressée sous 1 Mo.");
+};
 
 
 export const IdentityVerificationScreen = () => {
@@ -73,28 +121,38 @@ export const IdentityVerificationScreen = () => {
         takePhoto,
     } = useImagePicker();
 
+    const captureAndCompress = async (): Promise<string | null> => {
+        try {
+            const photo = await takePhoto();
+            if (!photo) return null;
+
+            return await compressIdentityPhoto(
+                photo.uri,
+                photo.width,
+                photo.height,
+            );
+        } catch (error) {
+            console.error("Erreur lors de la compression de la photo :", error);
+            Alert.alert(
+                "Photo impossible à traiter",
+                error instanceof Error
+                    ? error.message
+                    : "Veuillez reprendre la photo et réessayer.",
+            );
+            return null;
+        }
+    };
+
     const takeIdCard =
         async () => {
-            const photo =
-                await takePhoto();
-
-            if (photo) {
-                setIdCard(
-                    photo.uri,
-                );
-            }
+            const uri = await captureAndCompress();
+            if (uri) setIdCard(uri);
         };
 
     const takeSelfie =
         async () => {
-            const photo =
-                await takePhoto();
-
-            if (photo) {
-                setSelfie(
-                    photo.uri,
-                );
-            }
+            const uri = await captureAndCompress();
+            if (uri) setSelfie(uri);
         };
 
     const handleSubmit =
@@ -328,6 +386,7 @@ export const IdentityVerificationScreen = () => {
                                     Prenez une photo claire et
                                     lisible de votre document.
                                 </Text>
+                                <Text style={styles.sizeLimit}>Taille maximale : 1 Mo</Text>
                             </View>
                         </View>
 
@@ -468,6 +527,7 @@ export const IdentityVerificationScreen = () => {
                                     Prenez une photo de votre
                                     visage avec votre téléphone.
                                 </Text>
+                                <Text style={styles.sizeLimit}>Taille maximale : 1 Mo</Text>
                             </View>
                         </View>
 
@@ -796,6 +856,12 @@ const styles =
             fontSize: 11,
             lineHeight: 16,
             color: colors.textMuted,
+        },
+
+        sizeLimit: {
+            color: colors.textMuted,
+            fontSize: 11,
+            marginTop: 3,
         },
 
         documentCard: {

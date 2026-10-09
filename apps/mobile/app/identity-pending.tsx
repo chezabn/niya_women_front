@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "@/src/theme";
 
@@ -24,6 +25,14 @@ export default function IdentityPendingScreen() {
                         Vos documents restent confidentiels et sont consultés uniquement pour vérifier votre identité.
                     </Text>
                 </View>
+
+                <Pressable
+                    style={styles.loginLink}
+                    onPress={() => router.replace("/login")}
+                    accessibilityRole="link"
+                >
+                    <Text style={styles.loginLinkText}>Retourner à la page de connexion</Text>
+                </Pressable>
             </View>
         </SafeAreaView>
     );
@@ -76,5 +85,15 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         fontSize: 14,
         lineHeight: 21,
+    },
+    loginLink: {
+        marginTop: 24,
+        padding: 10,
+    },
+    loginLinkText: {
+        color: colors.primary,
+        fontSize: 14,
+        fontWeight: "700",
+        textDecorationLine: "underline",
     },
 });
