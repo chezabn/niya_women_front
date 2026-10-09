@@ -33,6 +33,11 @@ export const LoginScreen = () => {
     } = useAuthStore();
 
     const handleLogin = async () => {
+        if (!username.trim() || !password) {
+            setErrorMessage("Nom d'utilisateur ou Mot de passe vide");
+            return;
+        }
+
         try {
             setErrorMessage("");
 
@@ -134,6 +139,12 @@ export const LoginScreen = () => {
                 );
 
                 return;
+            }
+
+            if (error?.code === "AUTHENTICATION_FAILED") {
+                setErrorMessage(
+                    "Nom d'utilisateur ou mot de passe incorrect"
+                )
             }
 
             const detail = error?.detail;
