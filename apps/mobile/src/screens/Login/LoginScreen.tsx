@@ -145,6 +145,7 @@ export const LoginScreen = () => {
                 setErrorMessage(
                     "Nom d'utilisateur ou mot de passe incorrect"
                 )
+                return
             }
 
             const detail = error?.detail;
