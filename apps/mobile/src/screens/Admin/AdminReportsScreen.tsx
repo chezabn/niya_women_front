@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getAllReports } from "@niyya/api";
-import type { UserReportDetail } from "@niyya/types";
+import { getAllPublication, getAllReports } from "@niyya/api";
+import type { PublicationReport, UserReportDetail } from "@niyya/types";
 import { useAuthStore } from "@/src/store/authStore";
 import { colors } from "@/src/theme";
 import { LoginScreen } from "@/src/screens/Login/LoginScreen";
@@ -24,15 +24,22 @@ export function AdminReportsScreen() {
     const accessToken = useAuthStore((state) => state.accessToken);
     const user = useAuthStore((state) => state.user);
     const [reports, setReports] = useState<UserReportDetail[]>([]);
+    const [publicationReports, setPublicationReports] = useState<PublicationReport[]>([]);
+    const [selectedType, setSelectedType] = useState<"users" | "publications">("users");
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    const loadReports = useCallback(async (refresh = false) => {
+    const loadReports = useCallback(async (refresh = false, type = selectedType) => {
         if (!accessToken) return;
         refresh ? setRefreshing(true) : setLoading(true);
         try {
-            const response = await getAllReports(accessToken);
-            setReports(response.results);
+            if (type === "users") {
+                const response = await getAllReports(accessToken);
+                setReports(response.results);
+            } else {
+                const response = await getAllPublication(accessToken);
+                setPublicationReports(response.results);
+            }
         } catch (error) {
             console.error("Erreur lors du chargement des signalements :", error);
             Alert.alert("Erreur", "Impossible de charger les signalements.");
@@ -40,7 +47,7 @@ export function AdminReportsScreen() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [accessToken]);
+    }, [accessToken, selectedType]);
 
     useFocusEffect(useCallback(() => {
         void loadReports();
@@ -75,12 +82,21 @@ export function AdminReportsScreen() {
                         <Text style={styles.title}>Signalements</Text>
                     </View>
                     <View style={styles.countBadge}>
-                        <Text style={styles.countText}>{reports.length}</Text>
+                        <Text style={styles.countText}>{selectedType === "users" ? reports.length : publicationReports.length}</Text>
                     </View>
                 </View>
 
+                <View style={styles.tabs} accessibilityRole="tablist">
+                    <Pressable style={[styles.tab, selectedType === "users" && styles.activeTab]} onPress={() => setSelectedType("users")} accessibilityRole="tab" accessibilityState={{ selected: selectedType === "users" }}>
+                        <Text style={[styles.tabText, selectedType === "users" && styles.activeTabText]}>Utilisatrices</Text>
+                    </Pressable>
+                    <Pressable style={[styles.tab, selectedType === "publications" && styles.activeTab]} onPress={() => setSelectedType("publications")} accessibilityRole="tab" accessibilityState={{ selected: selectedType === "publications" }}>
+                        <Text style={[styles.tabText, selectedType === "publications" && styles.activeTabText]}>Publications</Text>
+                    </Pressable>
+                </View>
+
                 <Text style={styles.description}>
-                    Consultez les signalements transmis par les utilisatrices.
+                    {selectedType === "users" ? "Consultez les signalements transmis par les utilisatrices." : "Consultez les signalements de publications transmis par les utilisatrices."}
                 </Text>
 
                 {loading ? (
@@ -88,7 +104,7 @@ export function AdminReportsScreen() {
                         <ActivityIndicator color={colors.primary} />
                         <Text style={styles.stateText}>Chargement des signalements…</Text>
                     </View>
-                ) : reports.length === 0 ? (
+                ) : (selectedType === "users" ? reports.length === 0 : publicationReports.length === 0) ? (
                     <View style={styles.emptyCard}>
                         <View style={styles.emptyIcon}>
                             <Ionicons name="shield-checkmark-outline" size={29} color={colors.primary} />
@@ -96,7 +112,7 @@ export function AdminReportsScreen() {
                         <Text style={styles.emptyTitle}>Aucun signalement</Text>
                         <Text style={styles.stateText}>Les signalements reçus apparaîtront ici.</Text>
                     </View>
-                ) : reports.map((report) => (
+                ) : selectedType === "users" ? reports.map((report) => (
                     <View key={report.id} style={styles.reportCard}>
                         <View style={styles.reportHeader}>
                             <View style={styles.avatar}>
@@ -104,6 +120,25 @@ export function AdminReportsScreen() {
                             </View>
                             <View style={styles.reportPeople}>
                                 <Text style={styles.reported}>Utilisatrice signalée : {report.reported}</Text>
+                                <Text style={styles.reporter}>Signalé par : {report.reporter}</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.reason}>{report.reason}</Text>
+                        <Text style={styles.date}>
+                            {new Date(report.created_at).toLocaleString("fr-FR", {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                            })}
+                        </Text>
+                    </View>
+                )) : publicationReports.map((report) => (
+                    <View key={report.id} style={styles.reportCard}>
+                        <View style={styles.reportHeader}>
+                            <View style={styles.avatar}>
+                                <Ionicons name="document-text-outline" size={19} color={colors.primary} />
+                            </View>
+                            <View style={styles.reportPeople}>
+                                <Text style={styles.reported}>Publication signalée : #{report.publication}</Text>
                                 <Text style={styles.reporter}>Signalé par : {report.reporter}</Text>
                             </View>
                         </View>
@@ -132,6 +167,11 @@ const styles = StyleSheet.create({
     countBadge: { minWidth: 34, height: 34, borderRadius: 17, backgroundColor: "#F5EBD2", alignItems: "center", justifyContent: "center", paddingHorizontal: 9 },
     countText: { color: colors.primary, fontSize: 14, fontWeight: "700" },
     description: { color: colors.textSecondary, fontSize: 14, lineHeight: 21, marginBottom: 19 },
+    tabs: { flexDirection: "row", backgroundColor: "#EFECE7", borderRadius: 13, padding: 4, marginBottom: 16 },
+    tab: { flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 10, paddingVertical: 11 },
+    activeTab: { backgroundColor: colors.white, elevation: 2 },
+    tabText: { color: colors.textSecondary, fontSize: 14, fontWeight: "600" },
+    activeTabText: { color: colors.primary, fontWeight: "700" },
     reportCard: { backgroundColor: colors.white, borderRadius: 16, padding: 15, marginBottom: 11, borderWidth: 1, borderColor: "#F0ECE4" },
     reportHeader: { flexDirection: "row", alignItems: "center" },
     avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: "#F5EBD2", alignItems: "center", justifyContent: "center", marginRight: 11 },

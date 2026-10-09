@@ -42,7 +42,7 @@ import {
 import { useAuthStore } from "@/src/store/authStore";
 
 import { CommentList } from "@/src/components/publication/CommentList";
-import type { PublicationReport } from "@niyya/types";
+import type { PublicationReportPost } from "@niyya/types";
 
 type ReportReason = {
     id: string;
@@ -140,7 +140,7 @@ export const PublicationDetailScreen = () => {
         if (!reason) return;
         try {
             setReporting(true);
-            const response = await reportPublication(publication.id, { reason } satisfies PublicationReport, accessToken);
+            const response = await reportPublication(publication.id, { reason } satisfies PublicationReportPost, accessToken);
             setReportVisible(false);
             Alert.alert("Signalement envoyé", response.detail || "Votre signalement a bien été transmis. Merci de contribuer à la sécurité de la communauté.");
         } catch (error) {

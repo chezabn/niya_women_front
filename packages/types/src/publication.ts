@@ -37,11 +37,26 @@ export interface PublicationCreate {
 // ==================================
 // Report
 // ==================================
-export interface PublicationReport {
+export interface PublicationReportPost {
     reason: string;
 }
 
 export interface PublicationReportResponse {
     id: number;
     detail: string;
+}
+
+export interface PublicationReport {
+    id: number;
+    reporter: string;
+    publication: number;
+    reason: string;
+    created_at: string;
+}
+
+export interface PublicationReportList {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: PublicationReport[];
 }
