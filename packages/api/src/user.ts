@@ -21,6 +21,20 @@ export const getMe = (
     );
 };
 
+export const registerPushToken = (
+    pushToken: string,
+    accessToken: string,
+) => {
+    return apiFetch<{ detail?: string }>(
+        "/users/me/push-token/",
+        {
+            method: "POST",
+            body: JSON.stringify({ push_token: pushToken }),
+        },
+        accessToken,
+    );
+};
+
 export const updateMe = (
     payload: UserUpdate,
     accessToken: string,

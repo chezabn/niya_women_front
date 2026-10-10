@@ -42,7 +42,14 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "default",
+          "color": "#8A6BAF"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
