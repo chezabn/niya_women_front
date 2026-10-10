@@ -5,3 +5,4 @@ export * from "./publication";
 export * from "./journal";
 export * from "./comment";
 export * from "./social";
+export * from "./notifications";

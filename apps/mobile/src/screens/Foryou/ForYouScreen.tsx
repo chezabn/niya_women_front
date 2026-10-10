@@ -5,13 +5,13 @@ import {PublicationCard} from "@/src/components/publication/PublicationCard";
 import {PaginationButton} from "@/src/components/ui/PaginationButton";
 import {SafeAreaView} from "react-native-safe-area-context";
 
-import {router} from "expo-router";
+import {router, useFocusEffect} from "expo-router";
 
 import {Ionicons} from "@expo/vector-icons";
 
 import {colors} from "@/src/theme";
 
-import {geAllPublications, likePublication, unlikePublication,} from "@niyya/api";
+import {geAllPublications, getNotifications, likePublication, unlikePublication,} from "@niyya/api";
 
 import {Publication,} from "@niyya/types";
 
@@ -38,6 +38,7 @@ export const ForYouScreen = () => {
     const [nextPage, setNextPage] = useState<number | null>(null);
     const [loadingMore, setLoadingMore] = useState(false);
     const loadingMoreRef = useRef(false);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
 
     /*
@@ -101,6 +102,26 @@ export const ForYouScreen = () => {
             setLoadingMore(false);
         }
     }, [accessToken, nextPage]);
+
+    const loadUnreadNotificationStatus = useCallback(async () => {
+        if (!accessToken) {
+            setHasUnreadNotifications(false);
+            return;
+        }
+
+        try {
+            const response = await getNotifications(accessToken, 1, true);
+            setHasUnreadNotifications(response.count > 0);
+        } catch (error) {
+            console.error("Erreur lors du chargement du statut des notifications :", error);
+        }
+    }, [accessToken]);
+
+    useFocusEffect(
+        useCallback(() => {
+            void loadUnreadNotificationStatus();
+        }, [loadUnreadNotificationStatus]),
+    );
 
 
     /*
@@ -254,10 +275,10 @@ export const ForYouScreen = () => {
 
                 <Pressable
                     style={styles.notificationButton}
-                    onPress={() => {
-                        // TODO: écran notifications
-                    }}
+                    onPress={() => router.push("/notifications")}
                     hitSlop={10}
+                    accessibilityRole="button"
+                    accessibilityLabel={hasUnreadNotifications ? "Voir mes notifications non lues" : "Voir mes notifications"}
                 >
                     <Ionicons
                         name="notifications-outline"
@@ -266,11 +287,7 @@ export const ForYouScreen = () => {
                     />
 
                     {/* Badge notifications */}
-                    <View
-                        style={
-                            styles.notificationBadge
-                        }
-                    />
+                    {hasUnreadNotifications && <View style={styles.notificationBadge} />}
                 </Pressable>
             </View>
 
