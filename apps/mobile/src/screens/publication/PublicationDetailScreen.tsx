@@ -6,7 +6,9 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -417,9 +419,12 @@ export const PublicationDetailScreen = () => {
             .toUpperCase();
 
     return (
-        <SafeAreaView
-            style={styles.container}
-        >
+        <SafeAreaView style={styles.container}>
+          <KeyboardAvoidingView
+            style={styles.keyboardContainer}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={0}
+          >
             {/* Header */}
             <View
                 style={styles.header}
@@ -472,6 +477,7 @@ export const PublicationDetailScreen = () => {
             </View>
 
             <ScrollView
+                style={styles.scroll}
                 contentContainerStyle={
                     styles.content
                 }
@@ -790,6 +796,7 @@ export const PublicationDetailScreen = () => {
                     </View>
                 </View>
             </Modal>
+          </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
@@ -814,6 +821,14 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor:
         colors.white,
+    },
+
+    keyboardContainer: {
+        flex: 1,
+    },
+
+    scroll: {
+        flex: 1,
     },
 
     header: {

@@ -416,16 +416,18 @@ export const ProfileScreen = () => {
                 <View
                     style={styles.bioSection}
                 >
-                    <ProfileBio
-                        firstName={
-                            user.first_name
-                        }
-                        lastName={
-                            user.last_name
-                        }
-                        bio={user.profile.bio}
-                        showName={false}
-                    />
+                    {user.profile.bio?.trim() ? (
+                        <ProfileBio
+                            firstName={user.first_name}
+                            lastName={user.last_name}
+                            bio={user.profile.bio}
+                            showName={false}
+                        />
+                    ) : (
+                        <Text style={styles.addBioText}>
+                            Ajouter une bio
+                        </Text>
+                    )}
                 </View>
 
                 {/* Actions */}
@@ -640,6 +642,11 @@ const styles = StyleSheet.create({
     bioSection: {
         paddingHorizontal: 4,
         marginBottom: 4,
+    },
+    addBioText: {
+        color: colors.primary,
+        lineHeight: 20,
+        fontWeight: "600",
     },
 
     /*
