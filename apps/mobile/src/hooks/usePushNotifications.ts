@@ -11,6 +11,7 @@ const isAndroidExpoGo = Platform.OS === "android" && Constants.appOwnership === 
 
 const notificationRoute = (data: Record<string, unknown>): string | null => {
     const type = String(data.type ?? data.target_type ?? data.entity_type ?? "").toLowerCase();
+    if (type === "daily_journal_reminder") return "/journal";
     const publicationId = data.publication_id ?? (type.includes("publication") ? data.id : undefined);
     const userId = data.user_id ?? (type.includes("profile") || type.startsWith("user") ? data.id : undefined);
 
@@ -92,6 +93,25 @@ export const usePushNotifications = (): void => {
                     permissionStatus = (await Notifications.requestPermissionsAsync()).status;
                 }
                 if (cancelled || permissionStatus !== "granted") return;
+
+                // This is scheduled on the phone and is never added to the API feed.
+                const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+                await Promise.all(scheduledNotifications
+                    .filter((item) => item.content.data?.type === "daily_journal_reminder")
+                    .map((item) => Notifications.cancelScheduledNotificationAsync(item.identifier)));
+                await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "Un moment pour votre journal",
+                        body: "Pensez à remplir la page du jour de votre journal.",
+                        data: { type: "daily_journal_reminder" },
+                    },
+                    trigger: {
+                        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+                        hour: 20,
+                        minute: 0,
+                        repeats: true,
+                    },
+                });
 
                 const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
                 if (!projectId) {
