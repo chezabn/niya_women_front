@@ -24,3 +24,14 @@ export const markNotificationRead = (
         accessToken,
     );
 };
+
+export const deleteNotification = (
+    notificationId: number,
+    accessToken: string,
+) => {
+    return apiFetch<void>(
+        `/notifications/${notificationId}/`,
+        { method: "DELETE" },
+        accessToken,
+    );
+};

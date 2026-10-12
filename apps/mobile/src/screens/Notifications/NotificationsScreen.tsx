@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Pressable,
     RefreshControl,
@@ -12,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getNotifications, markNotificationRead } from "@niyya/api";
+import { deleteNotification, getNotifications, markNotificationRead } from "@niyya/api";
 import type { UserNotification } from "@niyya/types";
 import { useAuthStore } from "@/src/store/authStore";
 import { colors } from "@/src/theme";
@@ -48,6 +49,8 @@ export function NotificationsScreen() {
     const [nextPage, setNextPage] = useState<number | null>(null);
     const [loadingMore, setLoadingMore] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [deletingIds, setDeletingIds] = useState<Set<number>>(() => new Set());
+    const longPressHandled = useRef(false);
 
     const loadNotifications = useCallback(async (page = 1, refresh = false) => {
         if (!accessToken) {
@@ -103,6 +106,37 @@ export function NotificationsScreen() {
         }
     };
 
+    const removeNotification = async (notificationId: number) => {
+        if (!accessToken || deletingIds.has(notificationId)) return;
+        setDeletingIds((current) => new Set(current).add(notificationId));
+        try {
+            await deleteNotification(notificationId, accessToken);
+            setNotifications((current) => current.filter((item) => item.id !== notificationId));
+        } catch (error) {
+            console.error("Erreur lors de la suppression de la notification :", error);
+            Alert.alert("Suppression impossible", "La notification n’a pas pu être supprimée. Réessayez.");
+        } finally {
+            setDeletingIds((current) => {
+                const next = new Set(current);
+                next.delete(notificationId);
+                return next;
+            });
+        }
+    };
+
+    const confirmNotificationDeletion = (notificationId: number) => {
+        if (deletingIds.has(notificationId)) return;
+        longPressHandled.current = true;
+        Alert.alert(
+            "Supprimer la notification ?",
+            "Cette action est définitive.",
+            [
+                { text: "Annuler", style: "cancel" },
+                { text: "Supprimer", style: "destructive", onPress: () => void removeNotification(notificationId) },
+            ],
+        );
+    };
+
     if (!accessToken) return <LoginScreen />;
 
     return (
@@ -144,9 +178,19 @@ export function NotificationsScreen() {
                         return (
                             <Pressable
                                 style={({ pressed }) => [styles.notificationCard, !item.is_read && styles.unreadCard, pressed && styles.pressedCard]}
-                                onPress={() => openNotification(item)}
+                                onPressIn={() => { longPressHandled.current = false; }}
+                                onLongPress={() => confirmNotificationDeletion(item.id)}
+                                delayLongPress={500}
+                                onPress={() => {
+                                    if (longPressHandled.current) {
+                                        longPressHandled.current = false;
+                                        return;
+                                    }
+                                    openNotification(item);
+                                }}
                                 accessibilityRole="button"
                                 accessibilityLabel={`${item.actor_username} ${copy.verb}`}
+                                accessibilityHint="Maintenez appuyé pour afficher l’option de suppression"
                             >
                                 <View style={[styles.typeIcon, { backgroundColor: copy.tint }]}>
                                     <Ionicons name={copy.icon} size={19} color={copy.color} />
