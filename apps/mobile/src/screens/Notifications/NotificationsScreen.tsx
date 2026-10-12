@@ -29,7 +29,7 @@ const notificationCopy: Record<UserNotification["notification_type"], {
     comment: { verb: "a commenté votre publication", icon: "chatbubble", color: "#7B61A8", tint: "#F1EDF7" },
     follow: { verb: "a commencé à vous suivre", icon: "person-add", color: "#43836D", tint: "#EAF4EF" },
     identity_request: { verb: "a envoyé une demande de vérification d’identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
-    identity_approved: { verb: "a validé votre identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
+    identity_approved: { verb: "a accepté votre demande de vérification d’identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
     identity_rejected: { verb: "a refusé votre demande de vérification d’identité", icon: "shield-outline", color: "#B42318", tint: "#FDECEC" },
 };
 

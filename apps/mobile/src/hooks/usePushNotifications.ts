@@ -12,6 +12,7 @@ const isAndroidExpoGo = Platform.OS === "android" && Constants.appOwnership === 
 const notificationRoute = (data: Record<string, unknown>): string | null => {
     const type = String(data.type ?? data.target_type ?? data.entity_type ?? "").toLowerCase();
     if (type === "daily_journal_reminder") return "/journal";
+    if (type === "identity_verification_reminder") return "/identity-pending";
     if (type === "identity_request") return "/admin-review";
     if (type === "identity_approved") return "/(tabs)";
     if (type === "identity_rejected") return "/identity-rejected";
@@ -29,7 +30,9 @@ const notificationRoute = (data: Record<string, unknown>): string | null => {
 
 export const usePushNotifications = (): void => {
     const accessToken = useAuthStore((state) => state.accessToken);
+    const isEmailVerified = useAuthStore((state) => Boolean(state.user?.email_verified));
     const isFullyVerified = useAuthStore((state) => Boolean(state.user?.email_verified && state.user.identity_verified));
+    const shouldRemindIdentity = useAuthStore((state) => Boolean(state.user?.email_verified && !state.user.identity_verified));
 
     useEffect(() => {
         // Expo Go on Android no longer includes the native remote push module.
@@ -75,10 +78,9 @@ export const usePushNotifications = (): void => {
 
     useEffect(() => {
         if (isAndroidExpoGo) return;
-        if (!accessToken || !isFullyVerified) return;
 
         let cancelled = false;
-        const register = async () => {
+        const syncNotifications = async () => {
             try {
                 if (Platform.OS === "android") {
                     await Notifications.setNotificationChannelAsync("default", {
@@ -89,6 +91,15 @@ export const usePushNotifications = (): void => {
                     });
                 }
 
+                const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+                if (cancelled) return;
+                const reminderTypes = ["daily_journal_reminder", "identity_verification_reminder"];
+                await Promise.all(scheduledNotifications
+                    .filter((item) => reminderTypes.includes(String(item.content.data?.type)))
+                    .map((item) => Notifications.cancelScheduledNotificationAsync(item.identifier)));
+                if (cancelled) return;
+                if (!accessToken) return;
+
                 const permissions = await Notifications.getPermissionsAsync();
                 let permissionStatus = permissions.status;
                 if (permissionStatus !== "granted") {
@@ -97,25 +108,34 @@ export const usePushNotifications = (): void => {
                 }
                 if (cancelled || permissionStatus !== "granted") return;
 
-                // This is scheduled on the phone and is never added to the API feed.
-                const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-                await Promise.all(scheduledNotifications
-                    .filter((item) => item.content.data?.type === "daily_journal_reminder")
-                    .map((item) => Notifications.cancelScheduledNotificationAsync(item.identifier)));
-                await Notifications.scheduleNotificationAsync({
-                    content: {
-                        title: "Un moment pour votre journal",
-                        body: "Pensez à remplir la page du jour de votre journal.",
-                        data: { type: "daily_journal_reminder" },
-                    },
-                    trigger: {
-                        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-                        hour: 20,
-                        minute: 0,
-                        repeats: true,
-                    },
-                });
+                const scheduleDailyReminder = async (type: string, title: string, body: string) => {
+                    await Notifications.scheduleNotificationAsync({
+                        content: { title, body, data: { type } },
+                        trigger: {
+                            type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+                            hour: 18,
+                            minute: 23,
+                            repeats: true,
+                        },
+                    });
+                };
 
+                if (shouldRemindIdentity) {
+                    await scheduleDailyReminder(
+                        "identity_verification_reminder",
+                        "Confirmation d’identité",
+                        "Votre identité n’est pas encore confirmée. Pensez à terminer votre démarche de vérification.",
+                    );
+                }
+                if (isFullyVerified) {
+                    await scheduleDailyReminder(
+                        "daily_journal_reminder",
+                        "Un moment pour votre journal",
+                        "Pensez à remplir la page du jour de votre journal.",
+                    );
+                }
+
+                if (!isEmailVerified || cancelled) return;
                 const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
                 if (!projectId) {
                     console.warn("Expo projectId absent : impossible de récupérer le token push.");
@@ -125,12 +145,12 @@ export const usePushNotifications = (): void => {
                 const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
                 if (!cancelled) await registerPushToken(token, accessToken);
             } catch (error) {
-                // A push registration problem must never block access to the app.
-                console.warn("Impossible d'enregistrer le token push :", error);
+                // Notification setup must never block access to the app.
+                console.warn("Impossible de configurer les notifications :", error);
             }
         };
 
-        void register();
+        void syncNotifications();
         return () => { cancelled = true; };
-    }, [accessToken, isFullyVerified]);
+    }, [accessToken, isEmailVerified, isFullyVerified, shouldRemindIdentity]);
 };
