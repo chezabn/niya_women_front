@@ -1,4 +1,10 @@
-export type NotificationType = "like" | "comment" | "follow";
+export type NotificationType =
+    | "like"
+    | "comment"
+    | "follow"
+    | "identity_request"
+    | "identity_approved"
+    | "identity_rejected";
 
 export interface UserNotification {
     id: number;

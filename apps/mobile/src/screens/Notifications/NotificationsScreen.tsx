@@ -28,6 +28,9 @@ const notificationCopy: Record<UserNotification["notification_type"], {
     like: { verb: "a aimé votre publication", icon: "heart", color: "#D66B78", tint: "#FBEDEF" },
     comment: { verb: "a commenté votre publication", icon: "chatbubble", color: "#7B61A8", tint: "#F1EDF7" },
     follow: { verb: "a commencé à vous suivre", icon: "person-add", color: "#43836D", tint: "#EAF4EF" },
+    identity_request: { verb: "a envoyé une demande de vérification d’identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
+    identity_approved: { verb: "a validé votre identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
+    identity_rejected: { verb: "a refusé votre demande de vérification d’identité", icon: "shield-outline", color: "#B42318", tint: "#FDECEC" },
 };
 
 const formatNotificationDate = (date: string) => new Date(date).toLocaleString("fr-FR", {
@@ -87,7 +90,13 @@ export function NotificationsScreen() {
             });
         }
 
-        if (notification.notification_type === "follow") {
+        if (notification.notification_type === "identity_request") {
+            router.push("/admin-review");
+        } else if (notification.notification_type === "identity_approved") {
+            router.push("/(tabs)");
+        } else if (notification.notification_type === "identity_rejected") {
+            router.push("/identity-rejected");
+        } else if (notification.notification_type === "follow") {
             router.push(`/profile/${notification.actor_id}` as never);
         } else if (notification.publication_id !== null) {
             router.push(`/publications/${notification.publication_id}` as never);
@@ -159,7 +168,7 @@ export function NotificationsScreen() {
                                 <Ionicons name="notifications-off-outline" size={30} color={colors.primary} />
                             </View>
                             <Text style={styles.emptyTitle}>Aucune notification</Text>
-                            <Text style={styles.stateText}>Tes likes, commentaires et nouveaux abonnements apparaîtront ici.</Text>
+                            <Text style={styles.stateText}>Les mises à jour de ton compte et tes interactions apparaîtront ici.</Text>
                         </View>
                     }
                     ListFooterComponent={nextPage !== null ? (

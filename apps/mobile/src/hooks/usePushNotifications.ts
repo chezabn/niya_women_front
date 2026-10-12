@@ -12,6 +12,9 @@ const isAndroidExpoGo = Platform.OS === "android" && Constants.appOwnership === 
 const notificationRoute = (data: Record<string, unknown>): string | null => {
     const type = String(data.type ?? data.target_type ?? data.entity_type ?? "").toLowerCase();
     if (type === "daily_journal_reminder") return "/journal";
+    if (type === "identity_request") return "/admin-review";
+    if (type === "identity_approved") return "/(tabs)";
+    if (type === "identity_rejected") return "/identity-rejected";
     const publicationId = data.publication_id ?? (type.includes("publication") ? data.id : undefined);
     const userId = data.user_id ?? (type.includes("profile") || type.startsWith("user") ? data.id : undefined);
 
