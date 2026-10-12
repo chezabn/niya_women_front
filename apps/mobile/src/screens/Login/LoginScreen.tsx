@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+    ScrollView,
+    KeyboardAvoidingView,
+    Platform,
+    Image,
     View,
     Text,
     StyleSheet,
@@ -10,7 +14,6 @@ import {
 import { Link, router } from "expo-router";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
-import { SocialButton } from "@/src/components/ui/SocialButton";
 import { colors } from "@/src/theme";
 import {
     login,
@@ -171,89 +174,79 @@ export const LoginScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.title}>
-                    Bienvenue
-                </Text>
-
-                <Text style={styles.subtitle}>
-                    Connectez-vous à votre compte
-                </Text>
-
-                <AlertBanner
-                    type="error"
-                    visible={!!errorMessage}
-                    message={errorMessage}
-                />
-
-                <Input
-                    placeholder="Nom d'utilisateur"
-                    value={username}
-                    onChangeText={setUsername}
-                />
-
-                <View style={styles.passwordContainer}>
-                    <Input
-                        placeholder="Mot de passe"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={!showPassword}
-                    />
-
-                    <Pressable
-                        style={styles.passwordToggle}
-                        onPress={() =>
-                            setShowPassword((previous) => !previous)
-                        }
-                        accessibilityRole="button"
-                        accessibilityLabel={
-                            showPassword
-                                ? "Masquer le mot de passe"
-                                : "Afficher le mot de passe"
-                        }
-                    >
-                        <Text style={styles.passwordToggleText}>
-                            {showPassword ? "Masquer" : "Afficher"}
-                        </Text>
-                    </Pressable>
-                </View>
-
-                <Button
-                    text="Connexion"
-                    onPress={handleLogin}
-                />
-
-                <Link
-                    href="/forgot-password"
-                    style={styles.link}
+            <KeyboardAvoidingView
+                style={styles.keyboardView}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.content}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
                 >
-                    Mot de passe oublié ?
-                </Link>
+                    <View style={styles.hero}>
+                        <Image
+                            source={require("../../../assets/images/logo-foreground.png")}
+                            style={styles.brandLogo}
+                            resizeMode="contain"
+                            accessibilityLabel="Logo Niyya"
+                            accessible
+                        />
+                        <Text style={styles.title}>Bienvenue</Text>
+                        <Text style={styles.subtitle}>Connectez-vous à votre compte</Text>
+                    </View>
 
-                <Text style={styles.secondary}>
-                    OU
-                </Text>
+                    <View style={styles.form}>
+                        <AlertBanner
+                            type="error"
+                            visible={!!errorMessage}
+                            message={errorMessage}
+                        />
 
-                <SocialButton
-                    platform="google"
-                    onPress={() => {}}
-                />
+                        <Text style={styles.inputLabel}>Nom d’utilisateur</Text>
+                        <Input
+                            placeholder="Votre nom d’utilisateur"
+                            value={username}
+                            onChangeText={setUsername}
+                            autoCapitalize="none"
+                            returnKeyType="next"
+                        />
 
-                <SocialButton
-                    platform="apple"
-                    onPress={() => {}}
-                />
+                        <Text style={styles.inputLabel}>Mot de passe</Text>
+                        <View style={styles.passwordContainer}>
+                            <Input
+                                placeholder="Votre mot de passe"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry={!showPassword}
+                                returnKeyType="done"
+                                onSubmitEditing={handleLogin}
+                            />
 
-                <Text style={styles.secondary}>
-                    Vous n'avez pas de compte ?{" "}
-                    <Link
-                        href="/register"
-                        style={styles.link}
-                    >
-                        Inscrivez-vous maintenant
-                    </Link>
-                </Text>
-            </View>
+                            <Pressable
+                                style={styles.passwordToggle}
+                                onPress={() => setShowPassword((previous) => !previous)}
+                                accessibilityRole="button"
+                                accessibilityLabel={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                            >
+                                <Text style={styles.passwordToggleText}>
+                                    {showPassword ? "Masquer" : "Afficher"}
+                                </Text>
+                            </Pressable>
+                        </View>
+
+                        <Link href="/forgot-password" style={styles.forgotLink}>
+                            Mot de passe oublié ?
+                        </Link>
+
+                        <Button text="Se connecter" onPress={handleLogin} />
+                    </View>
+
+                    <Text style={styles.secondary}>
+                        Pas encore de compte ?{" "}
+                        <Link href="/register" style={styles.link}>S’inscrire</Link>
+                    </Text>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
@@ -261,33 +254,40 @@ export const LoginScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
+        backgroundColor: colors.background,
     },
-
+    keyboardView: { flex: 1 },
     content: {
-        flex: 1,
+        flexGrow: 1,
         paddingHorizontal: 24,
+        paddingVertical: 28,
         justifyContent: "center",
     },
-
+    hero: { alignItems: "center", marginBottom: 28 },
+    brandLogo: { width: 170, height: 170, marginBottom: 10 },
     title: {
-        fontSize: 32,
+        color: colors.black,
+        fontSize: 30,
         fontWeight: "700",
-        marginBottom: 8,
         textAlign: "center",
     },
-
     subtitle: {
-        fontSize: 16,
+        fontSize: 15,
         color: colors.textSecondary,
         textAlign: "center",
-        marginBottom: 32,
+        marginTop: 7,
     },
-
-    passwordContainer: {
-        position: "relative",
+    form: {
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: "#F0ECE4",
+        paddingHorizontal: 18,
+        paddingTop: 14,
+        paddingBottom: 16,
     },
-
+    inputLabel: { color: colors.text, fontSize: 13, fontWeight: "600", marginTop: 8 },
+    passwordContainer: { position: "relative" },
     passwordToggle: {
         position: "absolute",
         right: 16,
@@ -299,16 +299,23 @@ const styles = StyleSheet.create({
 
     passwordToggleText: {
         color: colors.primary,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: "600",
     },
-
+    forgotLink: {
+        alignSelf: "flex-end",
+        color: colors.primary,
+        fontSize: 13,
+        fontWeight: "600",
+        marginTop: 2,
+        marginBottom: 8,
+    },
     secondary: {
         textAlign: "center",
-        marginVertical: 16,
+        marginTop: 22,
         color: colors.textSecondary,
+        fontSize: 14,
     },
-
     link: {
         color: colors.primary,
         fontWeight: "600",
