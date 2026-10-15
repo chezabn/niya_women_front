@@ -10,6 +10,7 @@ import {router, useFocusEffect} from "expo-router";
 import {Ionicons} from "@expo/vector-icons";
 
 import {colors} from "@/src/theme";
+import {uniqueById} from "@/src/utils/uniqueById";
 
 import {geAllPublications, getNotifications, likePublication, unlikePublication,} from "@niyya/api";
 
@@ -66,9 +67,7 @@ export const ForYouScreen = () => {
                         1,
                     );
 
-                setPublications(
-                    response.results,
-                );
+                setPublications(uniqueById(response.results));
                 setNextPage(response.next ? 2 : null);
             } catch (error) {
                 console.error(
@@ -93,7 +92,7 @@ export const ForYouScreen = () => {
         setLoadingMore(true);
         try {
             const response = await geAllPublications(accessToken, nextPage);
-            setPublications((current) => [...current, ...response.results]);
+            setPublications((current) => uniqueById([...current, ...response.results]));
             setNextPage(response.next ? nextPage + 1 : null);
         } catch (error) {
             console.error("Erreur lors du chargement des publications :", error);

@@ -31,6 +31,7 @@ import {
 import { Publication } from "@niyya/types";
 
 import { colors } from "@/src/theme";
+import { uniqueById } from "@/src/utils/uniqueById";
 
 import { useAuthStore } from "@/src/store/authStore";
 
@@ -90,9 +91,7 @@ export const LikedPublicationsScreen = () => {
                             1,
                         );
 
-                    setPublications(
-                        response.results,
-                    );
+                    setPublications(uniqueById(response.results));
                     setNextPage(response.next ? 2 : null);
                 } catch (error) {
                     console.error(
@@ -118,7 +117,7 @@ export const LikedPublicationsScreen = () => {
         setLoadingMore(true);
         try {
             const response = await geAllPublicationsLiked(accessToken, nextPage);
-            setPublications((current) => [...current, ...response.results]);
+            setPublications((current) => uniqueById([...current, ...response.results]));
             setNextPage(response.next ? nextPage + 1 : null);
         } catch (error) {
             console.error("Erreur lors du chargement des publications aimées :", error);

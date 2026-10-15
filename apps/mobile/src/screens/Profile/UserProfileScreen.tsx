@@ -32,6 +32,7 @@ import {
 } from "@niyya/api";
 
 import {Publication, User, UserReport,} from "@niyya/types";
+import {uniqueById} from "@/src/utils/uniqueById";
 
 import {colors,} from "@/src/theme";
 
@@ -234,7 +235,7 @@ export default function UserProfileScreen() {
                     );
 
                     setPosts(
-                        publicationsResponse.results,
+                        uniqueById(publicationsResponse.results),
                     );
                     setNextPostsPage(publicationsResponse.next ? 2 : null);
 
@@ -263,7 +264,7 @@ export default function UserProfileScreen() {
         setLoadingMorePosts(true);
         try {
             const response = await getUserPublications(numericUserId, accessToken, nextPostsPage);
-            setPosts((current) => [...current, ...response.results]);
+            setPosts((current) => uniqueById([...current, ...response.results]));
             setNextPostsPage(response.next ? nextPostsPage + 1 : null);
         } catch (error) {
             console.error("Erreur lors du chargement des publications :", error);

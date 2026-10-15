@@ -28,6 +28,7 @@ import {
 import { Publication } from "@niyya/types";
 
 import { colors } from "@/src/theme";
+import { uniqueById } from "@/src/utils/uniqueById";
 
 import { useAuthStore } from "@/src/store/authStore";
 
@@ -222,7 +223,7 @@ export const ProfileScreen = () => {
                         1,
                     );
 
-                setPosts(response.results);
+                setPosts(uniqueById(response.results));
                 setNextPostsPage(response.next ? 2 : null);
             } catch (error) {
                 console.error(
@@ -241,7 +242,7 @@ export const ProfileScreen = () => {
         setLoadingMorePosts(true);
         try {
             const response = await getMyPublications(accessToken, nextPostsPage);
-            setPosts((current) => [...current, ...response.results]);
+            setPosts((current) => uniqueById([...current, ...response.results]));
             setNextPostsPage(response.next ? nextPostsPage + 1 : null);
         } catch (error) {
             console.error("Erreur lors du chargement des publications :", error);
