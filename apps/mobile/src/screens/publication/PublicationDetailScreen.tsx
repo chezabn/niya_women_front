@@ -39,6 +39,8 @@ import {
     likePublication,
     unlikePublication,
     reportPublication,
+    savePublication,
+    unsavePublication,
 } from "@niyya/api";
 
 import { useAuthStore } from "@/src/store/authStore";
@@ -117,6 +119,7 @@ export const PublicationDetailScreen = () => {
         setLiking,
     ] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
+    const [savingPublication, setSavingPublication] = useState(false);
     const [reportVisible, setReportVisible] = useState(false);
     const [selectedReportReason, setSelectedReportReason] = useState<ReportReason | null>(null);
     const [otherReason, setOtherReason] = useState("");
@@ -279,6 +282,21 @@ export const PublicationDetailScreen = () => {
         } finally {
             setLiking(false);
         }
+    };
+
+    const handleToggleSave = async () => {
+        if (!publication || !accessToken || savingPublication) return;
+        const wasSaved = publication.is_saved;
+        setSavingPublication(true);
+        setPublication((current) => current ? { ...current, is_saved: !wasSaved } : current);
+        try {
+            if (wasSaved) await unsavePublication(accessToken, publication.id);
+            else await savePublication(accessToken, publication.id);
+        } catch (error) {
+            console.error("Erreur lors de l’enregistrement de la publication :", error);
+            setPublication((current) => current ? { ...current, is_saved: wasSaved } : current);
+            Alert.alert("Enregistrement impossible", "La publication n’a pas pu être mise à jour.");
+        } finally { setSavingPublication(false); }
     };
 
     const handleDelete = () => {
@@ -454,24 +472,17 @@ export const PublicationDetailScreen = () => {
                 </Text>
 
                 {isOwner ? (
-                    <Pressable
-                        style={
-                            styles.headerButton
-                        }
-                        onPress={
-                            handleDelete
-                        }
-                        hitSlop={8}
-                    >
-                        <Ionicons
-                            name="trash-outline"
-                            size={22}
-                            color="#D9534F"
-                        />
-                    </Pressable>
+                    <View style={styles.headerActions}>
+                        <Pressable style={styles.headerButton} onPress={handleDelete} hitSlop={8} accessibilityLabel="Supprimer la publication">
+                            <Ionicons name="trash-outline" size={22} color="#D9534F" />
+                        </Pressable>
+                        <Pressable style={styles.headerButton} onPress={() => setMenuVisible(true)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Options de la publication">
+                            <Ionicons name="ellipsis-horizontal" size={23} color={colors.black} />
+                        </Pressable>
+                    </View>
                 ) : (
                     <Pressable style={styles.headerButton} onPress={() => setMenuVisible(true)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Options de la publication">
-                        <Ionicons name="menu" size={25} color={colors.black} />
+                        <Ionicons name="ellipsis-horizontal" size={23} color={colors.black} />
                     </Pressable>
                 )}
             </View>
@@ -754,10 +765,14 @@ export const PublicationDetailScreen = () => {
             <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
                 <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)}>
                     <View style={styles.menuCard}>
-                        <TouchableOpacity style={styles.menuOption} onPress={openReport}>
+                        <TouchableOpacity style={styles.menuOption} onPress={() => { setMenuVisible(false); void handleToggleSave(); }} disabled={savingPublication}>
+                            {savingPublication ? <ActivityIndicator size="small" color={colors.primary} /> : <Ionicons name={publication?.is_saved ? "bookmark" : "bookmark-outline"} size={19} color={colors.primary} />}
+                            <Text style={styles.menuOptionText}>{publication?.is_saved ? "Ne plus enregistrer" : "Enregistrer la publication"}</Text>
+                        </TouchableOpacity>
+                        {!isOwner && <TouchableOpacity style={styles.menuOption} onPress={openReport}>
                             <Ionicons name="flag-outline" size={19} color="#D9534F" />
                             <Text style={styles.menuOptionText}>Signaler la publication</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity>}
                     </View>
                 </Pressable>
             </Modal>
@@ -851,6 +866,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent:
             "center",
+    },
+
+    headerActions: {
+        flexDirection: "row",
+        alignItems: "center",
     },
 
     headerTitle: {

@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { Platform } from "react-native";
+import { useEffect, useRef } from "react";
+import { DeviceEventEmitter, Platform } from "react-native";
 import Constants, { AppOwnership } from "expo-constants";
 import * as Notifications from "expo-notifications";
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 
 import { registerPushToken } from "@niyya/api";
 import { useAuthStore } from "@/src/store/authStore";
@@ -16,6 +16,10 @@ const notificationRoute = (data: Record<string, unknown>): string | null => {
     if (type === "identity_request") return "/admin-review";
     if (type === "identity_approved") return "/(tabs)";
     if (type === "identity_rejected") return "/identity-rejected";
+    const conversationId = data.conversation_id;
+    if (type === "message" && (typeof conversationId === "string" || typeof conversationId === "number") && /^\d+$/.test(String(conversationId))) {
+        return `/messaging/${conversationId}`;
+    }
     const publicationId = data.publication_id ?? (type.includes("publication") ? data.id : undefined);
     const userId = data.user_id ?? (type.includes("profile") || type.startsWith("user") ? data.id : undefined);
 
@@ -29,6 +33,12 @@ const notificationRoute = (data: Record<string, unknown>): string | null => {
 };
 
 export const usePushNotifications = (): void => {
+    const segments = useSegments();
+    const isConversationOpen = useRef(false);
+    useEffect(() => {
+        isConversationOpen.current = segments[0] === "messaging";
+    }, [segments]);
+
     const accessToken = useAuthStore((state) => state.accessToken);
     const isEmailVerified = useAuthStore((state) => Boolean(state.user?.email_verified));
     const isFullyVerified = useAuthStore((state) => Boolean(state.user?.email_verified && state.user.identity_verified));
@@ -40,12 +50,24 @@ export const usePushNotifications = (): void => {
         if (isAndroidExpoGo) return;
 
         Notifications.setNotificationHandler({
-            handleNotification: async () => ({
-                shouldShowBanner: true,
-                shouldShowList: true,
-                shouldPlaySound: true,
-                shouldSetBadge: true,
-            }),
+            handleNotification: async (notification) => {
+                const data = notification.request.content.data ?? {};
+                const type = String(data.type ?? data.target_type ?? data.entity_type ?? "").toLowerCase();
+                if (type === "message" && isConversationOpen.current) {
+                    return {
+                        shouldShowBanner: false,
+                        shouldShowList: false,
+                        shouldPlaySound: false,
+                        shouldSetBadge: false,
+                    };
+                }
+                return {
+                    shouldShowBanner: true,
+                    shouldShowList: true,
+                    shouldPlaySound: true,
+                    shouldSetBadge: true,
+                };
+            },
         });
 
         let lastResponseId: string | null = null;
@@ -61,6 +83,13 @@ export const usePushNotifications = (): void => {
         const received = Notifications.addNotificationReceivedListener((notification) => {
             // setNotificationHandler displays the banner and sound while the app is active.
             console.info("Push notification reçue", notification.request.content.data);
+            const data = notification.request.content.data ?? {};
+            const conversationId = data.conversation_id;
+            if (String(data.type ?? "").toLowerCase() === "message" && /^\d+$/.test(String(conversationId ?? ""))) {
+                const id = Number(conversationId);
+                DeviceEventEmitter.emit("messaging:new-message", id);
+                if (!isConversationOpen.current) DeviceEventEmitter.emit("messaging:notify-user", id);
+            }
         });
         const response = Notifications.addNotificationResponseReceivedListener(handleResponse);
 

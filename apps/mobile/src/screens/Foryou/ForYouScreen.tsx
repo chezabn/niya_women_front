@@ -109,8 +109,16 @@ export const ForYouScreen = () => {
         }
 
         try {
-            const response = await getNotifications(accessToken, 1, true);
-            setHasUnreadNotifications(response.count > 0);
+            let page = 1;
+            let hasVisibleUnread = false;
+            let hasNext = true;
+            while (hasNext && !hasVisibleUnread) {
+                const response = await getNotifications(accessToken, page, true);
+                hasVisibleUnread = response.results.some((notification) => notification.notification_type !== "message");
+                hasNext = Boolean(response.next);
+                page += 1;
+            }
+            setHasUnreadNotifications(hasVisibleUnread);
         } catch (error) {
             console.error("Erreur lors du chargement du statut des notifications :", error);
         }

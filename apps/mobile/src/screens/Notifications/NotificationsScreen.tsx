@@ -32,6 +32,7 @@ const notificationCopy: Record<UserNotification["notification_type"], {
     identity_request: { verb: "a envoyé une demande de vérification d’identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
     identity_approved: { verb: "a accepté votre demande de vérification d’identité", icon: "shield-checkmark", color: "#43836D", tint: "#EAF4EF" },
     identity_rejected: { verb: "a refusé votre demande de vérification d’identité", icon: "shield-outline", color: "#B42318", tint: "#FDECEC" },
+    message: { verb: "vous a envoyé un message", icon: "chatbubble-ellipses", color: "#7B61A8", tint: "#F1EDF7" },
 };
 
 const formatNotificationDate = (date: string) => new Date(date).toLocaleString("fr-FR", {
@@ -65,7 +66,8 @@ export function NotificationsScreen() {
         setErrorMessage(null);
         try {
             const response = await getNotifications(accessToken, page);
-            setNotifications((current) => page === 1 ? response.results : [...current, ...response.results]);
+            const visibleNotifications = response.results.filter((item) => item.notification_type !== "message");
+            setNotifications((current) => page === 1 ? visibleNotifications : [...current, ...visibleNotifications]);
             setNextPage(response.next ? page + 1 : null);
         } catch (error) {
             console.error("Erreur lors du chargement des notifications :", error);

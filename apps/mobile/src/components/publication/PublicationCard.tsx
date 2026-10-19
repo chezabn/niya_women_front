@@ -85,11 +85,7 @@ export const PublicationCard = ({
                     </View>
                 </View>
 
-                <Ionicons
-                    name="ellipsis-horizontal"
-                    size={20}
-                    color="#999"
-                />
+                <Ionicons name="ellipsis-horizontal" size={20} color="#999" />
             </View>
 
 
@@ -262,7 +258,6 @@ const styles = StyleSheet.create({
     cardPressed: {
         opacity: 0.7,
     },
-
     cardHeader: {
         flexDirection: "row",
         alignItems: "center",

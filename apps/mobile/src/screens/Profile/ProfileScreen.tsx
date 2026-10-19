@@ -21,6 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import {
     getMe,
     getMyPublications,
+    getSavedPublications,
     likePublication,
     unlikePublication,
 } from "@niyya/api";
@@ -61,6 +62,11 @@ export const ProfileScreen = () => {
     const [loading, setLoading] = useState(true);
 
     const [posts, setPosts] = useState<Publication[]>([]);
+    const [savedPublications, setSavedPublications] = useState<Publication[]>([]);
+    const [savedPage, setSavedPage] = useState<number | null>(null);
+    const [loadingSaved, setLoadingSaved] = useState(false);
+    const [loadingMoreSaved, setLoadingMoreSaved] = useState(false);
+    const loadingMoreSavedRef = useRef(false);
     const [nextPostsPage, setNextPostsPage] = useState<number | null>(null);
     const [loadingMorePosts, setLoadingMorePosts] = useState(false);
     const loadingMorePostsRef = useRef(false);
@@ -130,6 +136,9 @@ export const ProfileScreen = () => {
                             : item,
                 ),
         );
+        setSavedPublications((current) => current.map((item) => item.id === publication.id
+            ? { ...item, is_liked: !wasLiked, like_count: wasLiked ? Math.max(0, previousLikeCount - 1) : previousLikeCount + 1 }
+            : item));
 
         try {
             if (wasLiked) {
@@ -166,6 +175,9 @@ export const ProfileScreen = () => {
                                 : item,
                     ),
             );
+            setSavedPublications((current) => current.map((item) => item.id === publication.id
+                ? { ...item, is_liked: wasLiked, like_count: previousLikeCount }
+                : item));
         } finally {
             setLikingPublicationIds(
                 (current) =>
@@ -235,6 +247,39 @@ export const ProfileScreen = () => {
         [accessToken],
     );
 
+    const refreshSavedPublications = useCallback(async () => {
+        if (!accessToken) return;
+        setLoadingSaved(true);
+        try {
+            const response = await getSavedPublications(accessToken, 1);
+            setSavedPublications(uniqueById(response.results));
+            setSavedPage(response.next ? 2 : null);
+        } catch (error) {
+            console.error("Erreur lors du chargement des publications enregistrées :", error);
+        } finally { setLoadingSaved(false); }
+    }, [accessToken]);
+
+    const loadMoreSavedPublications = useCallback(async () => {
+        if (!accessToken || savedPage === null || loadingMoreSavedRef.current) return;
+        loadingMoreSavedRef.current = true;
+        setLoadingMoreSaved(true);
+        try {
+            const response = await getSavedPublications(accessToken, savedPage);
+            setSavedPublications((current) => uniqueById([...current, ...response.results]));
+            setSavedPage(response.next ? savedPage + 1 : null);
+        } catch (error) {
+            console.error("Erreur lors du chargement des publications enregistrées :", error);
+        } finally {
+            loadingMoreSavedRef.current = false;
+            setLoadingMoreSaved(false);
+        }
+    }, [accessToken, savedPage]);
+
+    const handleProfileTabChange = (tab: "posts" | "saved") => {
+        setActiveTab(tab);
+        if (tab === "saved") void refreshSavedPublications();
+    };
+
     const loadMorePosts = useCallback(async () => {
         if (!accessToken || nextPostsPage === null || loadingMorePostsRef.current) return;
 
@@ -265,6 +310,7 @@ export const ProfileScreen = () => {
                 await Promise.all([
                     refreshUser(),
                     refreshPosts(),
+                    ...(activeTab === "saved" ? [refreshSavedPublications()] : []),
                 ]);
             } finally {
                 setLoading(false);
@@ -274,6 +320,8 @@ export const ProfileScreen = () => {
             accessToken,
             refreshUser,
             refreshPosts,
+            refreshSavedPublications,
+            activeTab,
         ],
     );
 
@@ -410,6 +458,8 @@ export const ProfileScreen = () => {
                         }
                         followers={user.followers_count}
                         following={user.following_count}
+                        onFollowersPress={() => router.push({ pathname: "/(tabs)/friends", params: { mode: "followers" } })}
+                        onFollowingPress={() => router.push({ pathname: "/(tabs)/friends", params: { mode: "following" } })}
                     />
                 </View>
 
@@ -446,7 +496,7 @@ export const ProfileScreen = () => {
                 >
                     <ProfileTabs
                         activeTab={activeTab}
-                        onChange={setActiveTab}
+                        onChange={handleProfileTabChange}
                     />
                 </View>
 
@@ -507,7 +557,20 @@ export const ProfileScreen = () => {
                     )}
 
                 {/* Enregistrés */}
-                {activeTab === "saved" && (
+                {activeTab === "saved" && loadingSaved && <View style={styles.savedLoading}><ActivityIndicator color={colors.primary} /></View>}
+
+                {activeTab === "saved" && !loadingSaved && savedPublications.length > 0 && (
+                    <PublicationList
+                        posts={savedPublications}
+                        onPress={handlePublicationPress}
+                        onLike={handleLike}
+                        hasMore={savedPage !== null}
+                        loadingMore={loadingMoreSaved}
+                        onLoadMore={loadMoreSavedPublications}
+                    />
+                )}
+
+                {activeTab === "saved" && !loadingSaved && savedPublications.length === 0 && (
                     <View
                         style={
                             styles.emptyPosts
@@ -674,6 +737,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         paddingVertical: 50,
     },
+    savedLoading: { minHeight: 180, alignItems: "center", justifyContent: "center" },
 
     emptyIconContainer: {
         width: 58,

@@ -4,7 +4,8 @@ export type NotificationType =
     | "follow"
     | "identity_request"
     | "identity_approved"
-    | "identity_rejected";
+    | "identity_rejected"
+    | "message";
 
 export interface UserNotification {
     id: number;
@@ -12,6 +13,7 @@ export interface UserNotification {
     actor_id: number;
     actor_username: string;
     publication_id: number | null;
+    conversation_id?: number | null;
     created_at: string;
     read_at: string | null;
     is_read: boolean;

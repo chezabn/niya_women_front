@@ -54,6 +54,22 @@ export async function getMyPublications(
     );
 }
 
+export async function getSavedPublications(accessToken: string, page = 1): Promise<PublicationListResponse> {
+    return apiFetch<PublicationListResponse>(
+        `/publications/publications/saved/?page=${page}`,
+        undefined,
+        accessToken,
+    );
+}
+
+export async function savePublication(accessToken: string, publicationId: number): Promise<{ saved: boolean; detail: string }> {
+    return apiFetch<{ saved: boolean; detail: string }>(`/publications/publications/${publicationId}/save/`, { method: "POST" }, accessToken);
+}
+
+export async function unsavePublication(accessToken: string, publicationId: number): Promise<{ saved: boolean; detail: string }> {
+    return apiFetch<{ saved: boolean; detail: string }>(`/publications/publications/${publicationId}/save/`, { method: "DELETE" }, accessToken);
+}
+
 
 export async function getMyPublication(
     accessToken: string,

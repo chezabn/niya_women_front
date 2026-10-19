@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     FlatList,
@@ -9,7 +9,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { getFollowers, getFollowing, removeFollower, unfollowUser } from "@niyya/api";
@@ -20,15 +20,20 @@ import { useAuthStore } from "@/src/store/authStore";
 type ListMode = "followers" | "following";
 
 export function FriendsScreen() {
+    const { mode: requestedMode } = useLocalSearchParams<{ mode?: ListMode }>();
     const accessToken = useAuthStore((state) => state.accessToken);
     const currentUserId = useAuthStore((state) => state.user?.id);
-    const [mode, setMode] = useState<ListMode>("followers");
+    const [mode, setMode] = useState<ListMode>(requestedMode === "following" ? "following" : "followers");
     const [followers, setFollowers] = useState<UserPreview[]>([]);
     const [following, setFollowing] = useState<UserPreview[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [busyUserId, setBusyUserId] = useState<number | null>(null);
     const [error, setError] = useState(false);
+
+    useEffect(() => {
+        if (requestedMode === "followers" || requestedMode === "following") setMode(requestedMode);
+    }, [requestedMode]);
 
     const loadLists = useCallback(async (refresh = false) => {
         if (!accessToken || !currentUserId) {
@@ -87,9 +92,12 @@ export function FriendsScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.title}>Abonnements</Text>
-                    <Text style={styles.subtitle}>Gérez vos followers et vos following</Text>
+                <Pressable style={styles.backButton} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Revenir au profil">
+                    <Ionicons name="arrow-back" size={24} color={colors.black} />
+                </Pressable>
+                <View style={styles.headerTitle}>
+                    <Text style={styles.title}>{mode === "followers" ? "Abonnées" : "Abonnements"}</Text>
+                    <Text style={styles.subtitle}>Gérez vos abonnées et vos abonnements</Text>
                 </View>
                 <Pressable style={styles.searchButton} onPress={() => router.push("/(tabs)/search")} accessibilityLabel="Rechercher des utilisatrices">
                     <Ionicons name="person-add-outline" size={21} color={colors.primary} />
@@ -98,10 +106,10 @@ export function FriendsScreen() {
 
             <View style={styles.tabs}>
                 <Pressable style={[styles.tab, mode === "followers" && styles.activeTab]} onPress={() => setMode("followers")}>
-                    <Text style={[styles.tabText, mode === "followers" && styles.activeTabText]}>Followers ({followers.length})</Text>
+                    <Text style={[styles.tabText, mode === "followers" && styles.activeTabText]}>Abonnées ({followers.length})</Text>
                 </Pressable>
                 <Pressable style={[styles.tab, mode === "following" && styles.activeTab]} onPress={() => setMode("following")}>
-                    <Text style={[styles.tabText, mode === "following" && styles.activeTabText]}>Following ({following.length})</Text>
+                    <Text style={[styles.tabText, mode === "following" && styles.activeTabText]}>Abonnements ({following.length})</Text>
                 </Pressable>
             </View>
 
@@ -150,7 +158,9 @@ export function FriendsScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20 },
+    header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 18, paddingBottom: 20, gap: 12 },
+    backButton: { width: 42, height: 42, alignItems: "center", justifyContent: "center" },
+    headerTitle: { flex: 1 },
     title: { color: colors.black, fontSize: 27, fontWeight: "700" },
     subtitle: { color: colors.textSecondary, fontSize: 14, marginTop: 4 },
     searchButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },

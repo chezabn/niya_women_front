@@ -22,6 +22,7 @@ import {Ionicons,} from "@expo/vector-icons";
 import {
     blockUser,
     followUser,
+    getOrCreateConversation,
     getUser,
     getUserPublications,
     isFollowing,
@@ -875,29 +876,38 @@ export default function UserProfileScreen() {
                             styles.friendButton
                         }
                     >
-                        <Button
-                            text={
-                                isUserFollowed
-                                    ? "Suivi"
-                                    : "Suivre"
-                            }
-                            onPress={
-                                handleFollowPress
-                            }
-                            isLoading={
-                                followLoading
-                            }
-                            color={
-                                isUserFollowed
-                                    ? colors.white
-                                    : colors.primary
-                            }
-                            textColor={
-                                isUserFollowed
-                                    ? colors.primary
-                                    : colors.white
-                            }
-                        />
+                        <View style={styles.profileActionsRow}>
+                            <View style={styles.followButton}>
+                                <Button
+                                    text={isUserFollowed ? "Suivi" : "Suivre"}
+                                    onPress={handleFollowPress}
+                                    isLoading={followLoading}
+                                    color={isUserFollowed ? colors.white : colors.primary}
+                                    textColor={isUserFollowed ? colors.primary : colors.white}
+                                />
+                            </View>
+                            {isUserFollowed && (
+                                <TouchableOpacity
+                                    style={styles.messageButton}
+                                    onPress={async () => {
+                                        if (!accessToken || !user) return;
+                                        try {
+                                            const conversation = await getOrCreateConversation(user.id, accessToken);
+                                            router.push(`/messaging/${conversation.id}?username=${encodeURIComponent(user.username)}&otherUserId=${user.id}` as any);
+                                        } catch (error) {
+                                            console.error("Erreur lors de l’ouverture de la conversation :", error);
+                                            Alert.alert("Messagerie indisponible", "Impossible d’ouvrir une conversation avec cette utilisatrice.");
+                                        }
+                                    }}
+                                    activeOpacity={0.8}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Envoyer un message à ${user.username}`}
+                                >
+                                    <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.primary} />
+                                    <Text style={styles.messageButtonText}>Message</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
                 )}
 
@@ -1719,6 +1729,31 @@ const styles =
         friendButton: {
             marginTop: -16,
             marginBottom: 12,
+        },
+        profileActionsRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+        },
+        followButton: {
+            flex: 1,
+        },
+        messageButton: {
+            minHeight: 48,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 7,
+            paddingHorizontal: 16,
+            borderWidth: 1,
+            borderColor: colors.primary,
+            borderRadius: 8,
+            backgroundColor: colors.white,
+        },
+        messageButtonText: {
+            color: colors.primary,
+            fontSize: 15,
+            fontWeight: "600",
         },
 
         avatar: {

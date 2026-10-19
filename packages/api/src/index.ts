@@ -6,3 +6,4 @@ export * from "./journal";
 export * from "./comment";
 export * from "./social";
 export * from "./notifications";
+export * from "./messaging";

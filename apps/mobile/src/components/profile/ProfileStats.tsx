@@ -1,5 +1,6 @@
 import React from "react";
 import {
+    Pressable,
     View,
     Text,
     StyleSheet,
@@ -9,21 +10,27 @@ interface Props {
     posts: number;
     followers: number;
     following: number;
+    onFollowersPress?: () => void;
+    onFollowingPress?: () => void;
 }
 
 export const ProfileStats = ({
                                  posts,
                                  followers,
                                  following,
+                                 onFollowersPress,
+                                 onFollowingPress,
                              }: Props) => {
     const Stat = ({
                       value,
                       label,
+                      onPress,
                   }: {
         value: number;
         label: string;
+        onPress?: () => void;
     }) => (
-        <View style={styles.item}>
+        <Pressable style={styles.item} onPress={onPress} disabled={!onPress} accessibilityRole={onPress ? "button" : undefined}>
             <Text style={styles.value}>
                 {value}
             </Text>
@@ -31,7 +38,7 @@ export const ProfileStats = ({
             <Text style={styles.label}>
                 {label}
             </Text>
-        </View>
+        </Pressable>
     );
 
     return (
@@ -43,12 +50,14 @@ export const ProfileStats = ({
 
             <Stat
                 value={followers}
-                label="Abonnés"
+                label="Abonnées"
+                onPress={onFollowersPress}
             />
 
             <Stat
                 value={following}
                 label="Abonnements"
+                onPress={onFollowingPress}
             />
         </View>
     );
@@ -57,12 +66,15 @@ export const ProfileStats = ({
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        justifyContent: "space-around",
-        marginBottom: 24,
+        alignItems: "center",
+        justifyContent: "center",
     },
 
     item: {
+        flex: 1,
+        justifyContent: "center",
         alignItems: "center",
+        paddingVertical: 8,
     },
 
     value: {

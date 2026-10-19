@@ -14,6 +14,7 @@ export interface Publication {
     is_archived: boolean;
     like_count: number;
     is_liked: boolean;
+    is_saved: boolean;
 }
 
 export interface PublicationListResponse {
